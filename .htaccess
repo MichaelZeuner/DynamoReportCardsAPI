@@ -1,0 +1,5 @@
+RewriteEngine ON
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+
+RewriteRule ^(.*)$ index.php/$1 [NC,L,QSA]
