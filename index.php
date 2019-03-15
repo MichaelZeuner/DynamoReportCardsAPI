@@ -50,6 +50,10 @@ switch($selector) {
     $skills->process($item, $join);
     break;
 
+    case 'report-cards':
+
+    break;
+
     default:
     $error->echoError("Invalid Selector [$selector]");
     break;

@@ -20,5 +20,3 @@ function getInputData() {
     }
     return $inputData;
 }
-
-?>

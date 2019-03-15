@@ -9,5 +9,3 @@ class ErrorProcess {
         echo json_encode($this->createError($message));
     }
 }
-
-?>
