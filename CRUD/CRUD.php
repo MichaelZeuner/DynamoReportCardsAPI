@@ -1,6 +1,10 @@
 <?php
 require_once(ROOT . '/helpers/connect.php');
 require_once(ROOT . '/helpers/InputParse.php');
+require_once(ROOT . '/CRUD/athletes.php');
+require_once(ROOT . '/CRUD/levels.php');
+require_once(ROOT . '/CRUD/events.php');
+require_once(ROOT . '/CRUD/skills.php');
 
 abstract class CRUD
 {
@@ -12,15 +16,19 @@ abstract class CRUD
         $this->error = $error;
     }
 
-    public function process($item) {
+    public function process($item, $join) {
         $method = $_SERVER['REQUEST_METHOD'];
 
         if('POST' === $method){
             if(isset($item)) {
                 http_response_code(HTTP_CODE_BAD_REQUEST);
-                echo json_encode($this->error->createError('Post to item is invalid.'));
+                if(empty($join)) {
+                    echo json_encode($this->error->createError('Post to item is invalid.'));
+                } else {
+                    echo json_encode($this->error->createError('Post for a join not supported.'));
+                }
             } else {
-                echo json_encode($this->create($_POST));
+                echo json_encode($this->create($_POST, $join));
             }
         }
         else if('PUT' === $method){
@@ -40,7 +48,7 @@ abstract class CRUD
             }
         }
         else if('GET' === $method) {
-            echo json_encode($this->read($item));
+            echo json_encode($this->read($item, $join));
         }
     }
 
@@ -64,13 +72,15 @@ abstract class CRUD
     
     abstract protected function getReadOneSQL();
     abstract protected function getReadSQL();
-    public function read($item) {
-        if(isset($item)) {
+    public function read($item, $join) {
+        if(isset($item) && empty($join)) {
             $stmt = $this->pdo->prepare($this->getReadOneSQL());
             $stmt->execute($this->getIdArray($item));
-        } 
-        else {
+        } else if(empty($item)) {
             $stmt = $this->pdo->query($this->getReadSQL());
+        } else {
+            $stmt = $this->pdo->prepare($this->getReadSQL() . " INNER JOIN $join WHERE $join.id = :id");
+            $stmt->execute($this->getIdArray($item));
         }
 
         $results = $stmt->fetchAll();

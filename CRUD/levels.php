@@ -1,6 +1,4 @@
 <?php
-require_once(ROOT . '/CRUD/CRUD.php');
-
 class Levels extends CRUD
 {
     public function getTableName() {
@@ -20,7 +18,8 @@ class Levels extends CRUD
     }
 
     protected function getReadSQL() {
-        return 'SELECT * FROM '.$this->getTableName();
+        $table = $this->getTableName();
+        return "SELECT $table.id, $table.name FROM $table";
     }
 
     protected function getRequiredUpdateData() {
