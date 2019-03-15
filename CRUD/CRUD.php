@@ -18,23 +18,26 @@ abstract class CRUD
         if('POST' === $method){
             if(isset($item)) {
                 http_response_code(HTTP_CODE_BAD_REQUEST);
-                return $this->error->createError('Post to item is invalid.');;
+                echo json_encode($this->error->createError('Post to item is invalid.'));
+            } else {
+                echo json_encode($this->create($_POST));
             }
-            echo json_encode($this->create($_POST));
         }
         else if('PUT' === $method){
             if(isset($item) === false) {
                 http_response_code(HTTP_CODE_BAD_REQUEST);
-                return $this->error->createError('Bulk put not supported at this time.');;
+                echo json_encode($this->error->createError('Bulk put not supported at this time.'));
+            } else {
+                echo json_encode($this->update($item, getInputData()));
             }
-            echo json_encode($this->update($item, getInputData()));
         }
         else if('DELETE' === $method){
             if(isset($item) === false) {
                 http_response_code(HTTP_CODE_BAD_REQUEST);
-                return $this->error->createError('Bulk delete not supported at this time.');;
+                echo json_encode($this->error->createError('Bulk delete not supported at this time.'));
+            } else {
+                $this->delete($item);
             }
-            $this->delete($item);
         }
         else if('GET' === $method) {
             echo json_encode($this->read($item));
@@ -50,8 +53,9 @@ abstract class CRUD
             $stmt = $this->pdo->prepare($this->getCreateSQL());
 
             $stmt->execute($data);
+            $createdResult = $this->read($this->pdo->lastInsertId());
             http_response_code(HTTP_CODE_CREATED);
-            return $this->read($this->pdo->lastInsertId());
+            return $createdResult;
         } else {
             http_response_code(HTTP_CODE_BAD_REQUEST);
             return $this->error->createError('Data mismatch. Required data: ' . json_encode($this->getRequiredCreateData()) . ' Found data: ' . json_encode(array_keys($data)));
