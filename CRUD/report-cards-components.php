@@ -5,6 +5,10 @@ class ReportCardsComponents extends CRUD
         return 'report_cards_components';
     }
 
+    protected function getCreateAccess() {
+        return [COACH, SUPERVISOR, ADMIN];
+    }
+
     protected function getRequiredCreateData() {
         return ['report_card_id', 'skill_id', 'rank'];
     }
@@ -31,6 +35,10 @@ class ReportCardsComponents extends CRUD
         return "SELECT $table.id, $table.report_card_id, $table.skill_id, $table.rank FROM $table";
     }
 
+    protected function getUpdateAccess() {
+        return $this->getCreateAccess();
+    }
+
     protected function getRequiredUpdateData() {
         return ['report_card_id', 'skill_id', 'rank'];
     }
@@ -38,5 +46,9 @@ class ReportCardsComponents extends CRUD
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().
                 ' SET report_card_id = :report_card_id, skill_id = :skill_id, rank = :rank WHERE id = :id';
+    }
+
+    protected function getDeleteAccess() {
+        return $this->getCreateAccess();
     }
 }

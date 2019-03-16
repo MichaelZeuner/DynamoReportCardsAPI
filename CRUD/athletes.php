@@ -5,6 +5,10 @@ class Athletes extends CRUD
         return 'athletes';
     }
 
+    protected function getCreateAccess() {
+        return [ADMIN];
+    }
+
     protected function getRequiredCreateData() {
         return ['first_name', 'last_name'];
     }
@@ -18,11 +22,19 @@ class Athletes extends CRUD
         return "SELECT $table.id, $table.first_name, $table.last_name FROM $table";
     }
 
+    protected function getUpdateAccess() {
+        return $this->getCreateAccess();
+    }
+
     protected function getRequiredUpdateData() {
         return ['first_name', 'last_name'];
     }
     
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().' SET first_name = :first_name, last_name = :last_name WHERE id = :id';
+    }
+
+    protected function getDeleteAccess() {
+        return $this->getCreateAccess();
     }
 }

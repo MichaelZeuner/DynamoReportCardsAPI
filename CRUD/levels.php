@@ -5,6 +5,10 @@ class Levels extends CRUD
         return 'levels';
     }
 
+    protected function getCreateAccess() {
+        return [ADMIN];
+    }
+
     protected function getRequiredCreateData() {
         return ['name'];
     }
@@ -18,11 +22,19 @@ class Levels extends CRUD
         return "SELECT $table.id, $table.name FROM $table";
     }
 
+    protected function getUpdateAccess() {
+        return $this->getCreateAccess();
+    }
+
     protected function getRequiredUpdateData() {
         return ['name'];
     }
     
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().' SET name = :name WHERE id = :id';
+    }
+
+    protected function getDeleteAccess() {
+        return $this->getCreateAccess();
     }
 }

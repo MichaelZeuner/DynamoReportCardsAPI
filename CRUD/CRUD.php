@@ -1,6 +1,7 @@
 <?php
 require_once(ROOT . '/helpers/connect.php');
 require_once(ROOT . '/helpers/InputParse.php');
+require_once(ROOT . '/CRUD/users.php');
 require_once(ROOT . '/CRUD/athletes.php');
 require_once(ROOT . '/CRUD/levels.php');
 require_once(ROOT . '/CRUD/events.php');
@@ -12,13 +13,15 @@ abstract class CRUD
 {
     public $pdo;
     protected $error;
+    protected $accessLevel = NONE;
 
     function __construct($pdo, $error) {
         $this->pdo = $pdo;
         $this->error = $error;
     }
 
-    public function process($item, $join) {
+    public function process($item, $join, $accessLevel) {
+        $this->accessLevel = $accessLevel;
         $method = $_SERVER['REQUEST_METHOD'];
 
         if('POST' === $method){
@@ -56,9 +59,16 @@ abstract class CRUD
 
     abstract static public function getTableName();
 
+    abstract protected function getCreateAccess();
     abstract protected function getRequiredCreateData();
     abstract protected function getCreateSQL();
     public function create($data) {
+        if(!in_array($this->accessLevel, $this->getCreateAccess())) {
+            http_response_code(HTTP_CODE_NOT_AUTHORIZED);
+            return $this->error->createError('NOT AUTHORIZED! Your access level: ' . $this->accessLevel . ', access levels permitted: ' . json_encode($this->getCreateAccess()));
+        }
+
+        $data = $this->dataManipulation($data);
         if($this->isRequiredData($data, $this->getRequiredCreateData())) {
             $stmt = $this->pdo->prepare($this->getCreateSQL());
             $stmt->execute($data);
@@ -73,12 +83,19 @@ abstract class CRUD
         }
     }
     
+    protected function getReadAccess() {
+        return [NONE, COACH, SUPERVISOR, ADMIN];
+    }
     protected function getReadOneSQL() {
         return 'SELECT * FROM '.$this->getTableName().' WHERE id = :id';
     }
-
     abstract protected function getReadSQL();
     public function read($item, $join) {
+        if(!in_array($this->accessLevel, $this->getReadAccess())) {
+            http_response_code(HTTP_CODE_NOT_AUTHORIZED);
+            return $this->error->createError('NOT AUTHORIZED! Your access level: ' . $this->accessLevel . ', access levels permitted: ' . json_encode($this->getReadAccess()));
+        }
+
         if(isset($item) && empty($join)) {
             $stmt = $this->pdo->prepare($this->getReadOneSQL());
             $stmt->execute($this->getIdArray($item));
@@ -99,9 +116,15 @@ abstract class CRUD
         return $results;
     }
     
+    abstract protected function getUpdateAccess();
     abstract protected function getRequiredUpdateData();
     abstract protected function getUpdateSQL();
     public function update($item, $data) {
+        if(!in_array($this->accessLevel, $this->getUpdateAccess())) {
+            http_response_code(HTTP_CODE_NOT_AUTHORIZED);
+            return $this->error->createError('NOT AUTHORIZED! Your access level: ' . $this->accessLevel . ', access levels permitted: ' . json_encode($this->getUpdateAccess()));
+        }
+
         if($this->isRequiredData($data, $this->getRequiredUpdateData())) {
             $stmt = $this->pdo->prepare($this->getUpdateSQL());
             $stmt->execute($this->getDataArrayWithId($data, $item));
@@ -115,10 +138,16 @@ abstract class CRUD
         }
     }
     
+    abstract protected function getDeleteAccess();
     protected function getDeleteSQL() {
         return 'DELETE FROM '.$this->getTableName().' WHERE id = :id';
     }
     public function delete($item) {
+        if(!in_array($this->accessLevel, $this->getDeleteAccess())) {
+            http_response_code(HTTP_CODE_NOT_AUTHORIZED);
+            return $this->error->createError('NOT AUTHORIZED! Your access level: ' . $this->accessLevel . ', access levels permitted: ' . json_encode($this->getDeleteAccess()));
+        }
+
         $stmt = $this->pdo->prepare($this->getDeleteSQL());
         $stmt->execute($this->getIdArray($item));
         
@@ -130,6 +159,8 @@ abstract class CRUD
             http_response_code(HTTP_CODE_NO_CONTENT);
         }
     }
+
+    protected function dataManipulation($data) {}
 
     protected function additionalQuery($data) {}
 

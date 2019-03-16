@@ -5,6 +5,10 @@ class ReportCards extends CRUD
         return 'report_cards';
     }
 
+    protected function getCreateAccess() {
+        return [COACH, SUPERVISOR, ADMIN];
+    }
+
     protected function getRequiredCreateData() {
         return ['athlete_id', 'level_id'];
     }
@@ -21,6 +25,10 @@ class ReportCards extends CRUD
         return "SELECT $table.id, $table.athlete_id, $table.level_id, $table.updated_date, $table.created_date FROM $table";
     }
 
+    protected function getUpdateAccess() {
+        return $this->getCreateAccess();
+    }
+
     protected function getRequiredUpdateData() {
         return ['athlete_id', 'level_id'];
     }
@@ -30,5 +38,9 @@ class ReportCards extends CRUD
         return 'UPDATE '.$this->getTableName().
                 " SET athlete_id = :athlete_id, level_id = :level_id, updated_date = '$date'".
                 ' WHERE id = :id';
+    }
+
+    protected function getDeleteAccess() {
+        return $this->getCreateAccess();
     }
 }
