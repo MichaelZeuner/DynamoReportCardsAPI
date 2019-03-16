@@ -41,17 +41,23 @@ switch($selector) {
     break;
 
     case 'events':
-    $skills = new Events($pdo, $error);
-    $skills->process($item, $join);
+    $events = new Events($pdo, $error);
+    $events->process($item, $join);
     break;
 
     case 'skills':
     $skills = new Skills($pdo, $error);
     $skills->process($item, $join);
     break;
-
+    
     case 'report-cards':
-
+    $reportCards = new ReportCards($pdo, $error);
+    $reportCards->process($item, $join);
+    break;
+    
+    case 'report-cards-components':
+    $reportCardsComponents = new ReportCardsComponents($pdo, $error);
+    $reportCardsComponents->process($item, $join);
     break;
 
     default:

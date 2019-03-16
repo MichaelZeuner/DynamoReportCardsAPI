@@ -5,6 +5,8 @@ require_once(ROOT . '/CRUD/athletes.php');
 require_once(ROOT . '/CRUD/levels.php');
 require_once(ROOT . '/CRUD/events.php');
 require_once(ROOT . '/CRUD/skills.php');
+require_once(ROOT . '/CRUD/report-cards.php');
+require_once(ROOT . '/CRUD/report-cards-components.php');
 
 abstract class CRUD
 {
@@ -52,16 +54,17 @@ abstract class CRUD
         }
     }
 
-    abstract public function getTableName();
+    abstract static public function getTableName();
 
     abstract protected function getRequiredCreateData();
     abstract protected function getCreateSQL();
     public function create($data) {
         if($this->isRequiredData($data, $this->getRequiredCreateData())) {
             $stmt = $this->pdo->prepare($this->getCreateSQL());
-
             $stmt->execute($data);
-            $createdResult = $this->read($this->pdo->lastInsertId());
+            $createdResult = $this->read($this->pdo->lastInsertId(), null);
+            $this->additionalQuery($data);
+
             http_response_code(HTTP_CODE_CREATED);
             return $createdResult;
         } else {
@@ -70,7 +73,10 @@ abstract class CRUD
         }
     }
     
-    abstract protected function getReadOneSQL();
+    protected function getReadOneSQL() {
+        return 'SELECT * FROM '.$this->getTableName().' WHERE id = :id';
+    }
+
     abstract protected function getReadSQL();
     public function read($item, $join) {
         if(isset($item) && empty($join)) {
@@ -79,7 +85,7 @@ abstract class CRUD
         } else if(empty($item)) {
             $stmt = $this->pdo->query($this->getReadSQL());
         } else {
-            $stmt = $this->pdo->prepare($this->getReadSQL() . " INNER JOIN $join WHERE $join.id = :id");
+            $stmt = $this->pdo->prepare($this->getReadSQL() . " JOIN $join WHERE $join.id = :id");
             $stmt->execute($this->getIdArray($item));
         }
 
@@ -99,16 +105,19 @@ abstract class CRUD
         if($this->isRequiredData($data, $this->getRequiredUpdateData())) {
             $stmt = $this->pdo->prepare($this->getUpdateSQL());
             $stmt->execute($this->getDataArrayWithId($data, $item));
+            $this->additionalQuery($data);
 
             http_response_code(HTTP_CODE_OK);
-            return $this->read($item);
+            return $this->read($item, null);
         } else {
             http_response_code(HTTP_CODE_BAD_REQUEST);
             return $this->error->createError('Data mismatch. Required data: ' . json_encode($this->getRequiredUpdateData()) . ' Found data: ' . json_encode(array_keys($data)));
         }
     }
     
-    abstract protected function getDeleteSQL();
+    protected function getDeleteSQL() {
+        return 'DELETE FROM '.$this->getTableName().' WHERE id = :id';
+    }
     public function delete($item) {
         $stmt = $this->pdo->prepare($this->getDeleteSQL());
         $stmt->execute($this->getIdArray($item));
@@ -120,6 +129,12 @@ abstract class CRUD
         else {
             http_response_code(HTTP_CODE_NO_CONTENT);
         }
+    }
+
+    protected function additionalQuery($data) {}
+
+    public function getCurrentDateTime() {
+        return gmdate('Y-m-d H:i:s', time());
     }
 
     private function getIdArray($item) {
