@@ -23,7 +23,7 @@ $collection2 = isset($url[2]) ? $url[2] : null;
 
 if(isset($collection2)) {
     $selector = $collection2;
-    $join = $collection1;
+    $join = str_replace('-', '_', $collection1);
 } else {
     $selector = $collection1;
     $join = null; 
