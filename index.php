@@ -18,7 +18,7 @@ $error = new ErrorProcess();
 $url = isset($_SERVER['PATH_INFO']) ? explode('/', ltrim($_SERVER['PATH_INFO'], '/')) : [];
 
 $accessLevel = 'NONE';
-if (isset($_SERVER)) {
+if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
     $username = $_SERVER['PHP_AUTH_USER'];
     $password = $_SERVER['PHP_AUTH_PW'];
     if (isset($username) && isset($password)) {
