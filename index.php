@@ -11,16 +11,20 @@ require_once(ROOT . '/helpers/http_codes.php');
 require_once(ROOT . '/helpers/errors.php');
 require_once(ROOT . '/CRUD/CRUD.php');
 
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Authorization");
 header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
 
 $error = new ErrorProcess();
 $url = isset($_SERVER['PATH_INFO']) ? explode('/', ltrim($_SERVER['PATH_INFO'], '/')) : [];
 
 $accessLevel = 'NONE';
+$loggedInUser = null;
+
 if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
     $username = $_SERVER['PHP_AUTH_USER'];
     $password = $_SERVER['PHP_AUTH_PW'];
+
     if (isset($username) && isset($password)) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
         $stmt->execute([ "username" => $username ]);
@@ -28,9 +32,14 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
         if(isset($user) && isset($user['password_hash'])) {
             if (password_verify($password, $user['password_hash'])) {
                 $accessLevel = $user['access'];
+                unset($user['password_hash']);
+                $loggedInUser = $user;
             }
         }
     }
+} else {
+    $error->echoError("SERVER EMPTY");
+    die();
 }
 
 if(count($url) <= 1 && empty($url[0])) {
@@ -51,6 +60,16 @@ if(isset($collection2)) {
 }
 
 switch($selector) {
+    case 'login':
+    if(empty($loggedInUser)) {
+        http_response_code(HTTP_CODE_NOT_AUTHORIZED);
+        $error->echoError('Incorrect username or password');
+    } else {
+        http_response_code(HTTP_CODE_OK);
+        echo json_encode($loggedInUser);
+    }
+    break;
+
     case 'users':
     $users = new Users($pdo, $error);
     $users->process($item, $join, $accessLevel);
