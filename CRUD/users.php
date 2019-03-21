@@ -36,6 +36,10 @@ class Users extends CRUD
                     :first_name, :last_name, :access)';
     }
 
+    protected function getReadAccess() {
+        return $this->getCreateAccess();
+    }
+
     protected function getReadSQL() {
         $table = $this->getTableName();
         return "SELECT * FROM $table";

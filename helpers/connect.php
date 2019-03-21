@@ -1,5 +1,10 @@
 <?php
-if($_SERVER['REMOTE_ADDR'] === '127.0.0.1') {
+
+function isLocal() {
+     return $_SERVER['REMOTE_ADDR'] === '127.0.0.1';
+}
+
+if(isLocal()) {
      $db   = 'report_cards';
      $user = 'root';
      $pass = '';
