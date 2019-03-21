@@ -7,7 +7,7 @@ class Users extends CRUD
 
     protected function dataManipulation($data) {
         $password = $data['password'];
-        $password_hash = password_hash($_SERVER['PHP_AUTH_PW'], PASSWORD_BCRYPT);
+        $password_hash = password_hash($password, PASSWORD_BCRYPT);
         unset($data['password']);
         $data['password_hash'] = $password_hash;
         return $data;

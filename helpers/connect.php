@@ -1,9 +1,14 @@
 <?php
-
+if($_SERVER['REMOTE_ADDR'] === '127.0.0.1') {
+     $db   = 'report_cards';
+     $user = 'root';
+     $pass = '';
+} else {
+     $db   = 'dynamoca_report_cards';
+     $user = 'dynamoca_api';
+     $pass = 'LeB4c%^e9rcN';
+}
 $host = 'localhost';
-$db   = 'report_cards';
-$user = 'root';
-$pass = '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

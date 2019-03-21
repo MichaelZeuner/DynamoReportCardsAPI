@@ -125,6 +125,7 @@ abstract class CRUD
             return $this->error->createError('NOT AUTHORIZED! Your access level: ' . $this->accessLevel . ', access levels permitted: ' . json_encode($this->getUpdateAccess()));
         }
 
+        $data = $this->dataManipulation($data);
         if($this->isRequiredData($data, $this->getRequiredUpdateData())) {
             $stmt = $this->pdo->prepare($this->getUpdateSQL());
             $stmt->execute($this->getDataArrayWithId($data, $item));

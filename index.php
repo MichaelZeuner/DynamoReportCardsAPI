@@ -16,7 +16,9 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 
 $error = new ErrorProcess();
-$url = isset($_SERVER['PATH_INFO']) ? explode('/', ltrim($_SERVER['PATH_INFO'], '/')) : [];
+$path_info = !empty($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : (!empty($_SERVER['ORIG_PATH_INFO']) ? $_SERVER['ORIG_PATH_INFO'] : '');
+
+$url = explode('/', ltrim($path_info, '/'));
 
 $accessLevel = 'NONE';
 $loggedInUser = null;
@@ -26,6 +28,7 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
     $password = $_SERVER['PHP_AUTH_PW'];
 
     if (isset($username) && isset($password)) {
+        
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
         $stmt->execute([ "username" => $username ]);
         $user = $stmt->fetch();
@@ -37,9 +40,6 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
             }
         }
     }
-} else {
-    $error->echoError("SERVER EMPTY");
-    die();
 }
 
 if(count($url) <= 1 && empty($url[0])) {
