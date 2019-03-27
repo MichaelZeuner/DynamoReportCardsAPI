@@ -1,7 +1,7 @@
 <?php
 
 function isLocal() {
-     return $_SERVER['REMOTE_ADDR'] === '127.0.0.1';
+     return in_array($_SERVER['REMOTE_ADDR'], array('127.0.0.1', '::1'));
 }
 
 if(isLocal()) {

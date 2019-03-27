@@ -41,7 +41,7 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
         }
     }
 } else if(isLocal()) {
-    $error->echoError('silly silly -- required only for local. Something causes multiple call with CORS on local');
+    $error->echoError('Probably no access -- silly silly -- required only for local. Something causes multiple call with CORS on local');
     die();
 }
 
