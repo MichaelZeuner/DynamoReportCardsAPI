@@ -102,7 +102,7 @@ abstract class CRUD
         } else if(empty($item)) {
             $stmt = $this->pdo->query($this->getReadSQL());
         } else {
-            $stmt = $this->pdo->prepare($this->getReadSQL() . " JOIN $join WHERE $join.id = :id");
+            $stmt = $this->pdo->prepare($this->getReadSQL() . " JOIN $join WHERE $join"."_id = :id");
             $stmt->execute($this->getIdArray($item));
         }
 

@@ -62,6 +62,7 @@ if(isset($collection2)) {
     $join = null; 
 }
 
+//crud
 switch($selector) {
     case 'login':
     if(empty($loggedInUser)) {
@@ -109,6 +110,41 @@ switch($selector) {
     break;
 
     default:
-    $error->echoError("Invalid Selector [$selector]");
+
+    //others
+    switch($url[0]) {
+        case 'levelEvents':
+        $stmt = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON skills.events_id = events.id WHERE levels_id = :id");
+        $stmt->execute(['id' => $item]);
+
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            http_response_code(HTTP_CODE_NOT_FOUND);
+            $error->echoError('No data found');
+        } else {
+            http_response_code(HTTP_CODE_OK);
+            echo json_encode($results);
+        }
+        break;
+
+        case 'levelEventSkills':
+        $stmt = $pdo->prepare("SELECT DISTINCT id, name FROM skills WHERE levels_id = :levels_id AND events_id = :events_id");
+        $stmt->execute(['levels_id' => $url[1], 'events_id' => $url[2]]);
+    
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            http_response_code(HTTP_CODE_NOT_FOUND);
+            $error->echoError('No data found');
+        } else {
+            http_response_code(HTTP_CODE_OK);
+            echo json_encode($results);
+        }
+        break;
+
+        default:
+        $error->echoError("Invalid Selector [$selector]");
+        break;
+    }
+
     break;
 }
