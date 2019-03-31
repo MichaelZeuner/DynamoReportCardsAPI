@@ -10,13 +10,13 @@ class Skills extends CRUD
     }
 
     protected function getRequiredCreateData() {
-        return ['level_id', 'event_id', 'name'];
+        return ['levels_id', 'events_id', 'name'];
     }
     
     protected function getCreateSQL() {
         return 'INSERT INTO '.$this->getTableName().
-                ' (level_id, event_id, name) VALUES'.
-                ' (:level_id, :event_id, :name)';
+                ' (levels_id, events_id, name) VALUES'.
+                ' (:levels_id, :events_id, :name)';
     }
 
     protected function getReadSQL() {
@@ -29,12 +29,12 @@ class Skills extends CRUD
     }
 
     protected function getRequiredUpdateData() {
-        return ['level_id', 'event_id', 'name'];
+        return ['levels_id', 'events_id', 'name'];
     }
     
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().
-                ' SET level_id = :level_id, event_id = :event_id, name = :name'.
+                ' SET levels_id = :levels_id, events_id = :events_id, name = :name'.
                 ' WHERE id = :id';
     }
 

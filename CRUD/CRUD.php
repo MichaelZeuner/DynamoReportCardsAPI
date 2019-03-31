@@ -25,6 +25,9 @@ abstract class CRUD
         $method = $_SERVER['REQUEST_METHOD'];
 
         if('POST' === $method){
+            if(empty($_POST)) {
+                $_POST = json_decode(file_get_contents('php://input'), true);
+            }
             if(isset($item)) {
                 http_response_code(HTTP_CODE_BAD_REQUEST);
                 if(empty($join)) {
@@ -99,14 +102,16 @@ abstract class CRUD
         if(isset($item) && empty($join)) {
             $stmt = $this->pdo->prepare($this->getReadOneSQL());
             $stmt->execute($this->getIdArray($item));
+            $results = $stmt->fetch();
         } else if(empty($item)) {
             $stmt = $this->pdo->query($this->getReadSQL());
+            $results = $stmt->fetchAll();
         } else {
             $stmt = $this->pdo->prepare($this->getReadSQL() . " JOIN $join WHERE $join"."_id = :id");
             $stmt->execute($this->getIdArray($item));
+            $results = $stmt->fetchAll();
         }
 
-        $results = $stmt->fetchAll();
         if(count($results) == 0) {
             http_response_code(HTTP_CODE_NOT_FOUND);
             return $this->error->createError('No data found');
@@ -161,7 +166,7 @@ abstract class CRUD
         }
     }
 
-    protected function dataManipulation($data) {}
+    protected function dataManipulation($data) { return $data; }
 
     protected function additionalQuery($data) {}
 

@@ -10,19 +10,19 @@ class ReportCards extends CRUD
     }
 
     protected function getRequiredCreateData() {
-        return ['athlete_id', 'level_id'];
+        return ['athletes_id', 'levels_id', 'comment'];
     }
     
     protected function getCreateSQL() {
         $date = $this->getCurrentDateTime();
         return 'INSERT INTO '.$this->getTableName().
-                ' (athlete_id, level_id, updated_date, created_date) VALUES'.
-                " (:athlete_id, :level_id, '$date', '$date')";
+                ' (athletes_id, levels_id, comment, updated_date, created_date) VALUES'.
+                " (:athletes_id, :levels_id, :comment, '$date', '$date')";
     }
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.athlete_id, $table.level_id, $table.updated_date, $table.created_date FROM $table";
+        return "SELECT $table.id, $table.athletes_id, $table.levels_id, $table.comment, $table.updated_date, $table.created_date FROM $table";
     }
 
     protected function getUpdateAccess() {
@@ -30,13 +30,13 @@ class ReportCards extends CRUD
     }
 
     protected function getRequiredUpdateData() {
-        return ['athlete_id', 'level_id'];
+        return $this->getRequiredCreateData();
     }
     
     protected function getUpdateSQL() {
         $date = $this->getCurrentDateTime();
         return 'UPDATE '.$this->getTableName().
-                " SET athlete_id = :athlete_id, level_id = :level_id, updated_date = '$date'".
+                " SET athletes_id = :athletes_id, levels_id = :levels_id, comment = :comment, updated_date = '$date'".
                 ' WHERE id = :id';
     }
 
