@@ -22,11 +22,11 @@ class ReportCards extends CRUD
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.athletes_id, $table.levels_id, $table.comment, $table.updated_date, $table.created_date FROM $table";
+        return "SELECT $table.id, $table.athletes_id, $table.levels_id, $table.comment, $table.approved, $table.updated_date, $table.created_date FROM $table";
     }
 
     protected function getUpdateAccess() {
-        return $this->getCreateAccess();
+        return ['athletes_id', 'levels_id', 'comment', 'approved'];
     }
 
     protected function getRequiredUpdateData() {
@@ -36,7 +36,7 @@ class ReportCards extends CRUD
     protected function getUpdateSQL() {
         $date = $this->getCurrentDateTime();
         return 'UPDATE '.$this->getTableName().
-                " SET athletes_id = :athletes_id, levels_id = :levels_id, comment = :comment, updated_date = '$date'".
+                " SET athletes_id = :athletes_id, levels_id = :levels_id, comment = :comment, approved = :approved, updated_date = '$date'".
                 ' WHERE id = :id';
     }
 
