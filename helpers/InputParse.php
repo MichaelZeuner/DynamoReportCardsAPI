@@ -1,7 +1,7 @@
 <?php
 
 function getInputData() {
-    parse_str(file_get_contents('php://input'), $_INPUT);
+    /*parse_str(file_get_contents('php://input'), $_INPUT);
 
     $inputData = [];
     foreach($_INPUT as $input) {
@@ -18,5 +18,15 @@ function getInputData() {
             }
         }
     }
-    return $inputData;
+    return $inputData;*/
+    $postdata = file_get_contents("php://input");
+    //echo '---------------' . $postdata . '-------------------';
+
+    if(isset($postdata) && !empty($postdata))
+    {
+        //echo 'SET AND STUFF';
+        // Extract the data.
+        return json_decode($postdata);
+    }
+    return [];
 }

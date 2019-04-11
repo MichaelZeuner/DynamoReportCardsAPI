@@ -26,11 +26,19 @@ class ReportCards extends CRUD
     }
 
     protected function getUpdateAccess() {
-        return ['athletes_id', 'levels_id', 'comment', 'approved'];
+        return $this->getCreateAccess();
+    }
+
+    protected function dataManipulation($data) { 
+        $newData['athletes_id'] = $data['athlete']['id'];
+        $newData['levels_id'] = $data['level']['id'];
+        $newData['comment'] = $data['comment'];
+        $newData['approved'] = $data['approved'];
+        return $newData; 
     }
 
     protected function getRequiredUpdateData() {
-        return $this->getRequiredCreateData();
+        return ['athletes_id', 'levels_id', 'comment', 'approved'];
     }
     
     protected function getUpdateSQL() {

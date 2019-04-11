@@ -44,7 +44,9 @@ abstract class CRUD
                 http_response_code(HTTP_CODE_BAD_REQUEST);
                 echo json_encode($this->error->createError('Bulk put not supported at this time.'));
             } else {
-                echo json_encode($this->update($item, getInputData()));
+                //$putData = getInputData();
+                $putData = json_decode(file_get_contents("php://input"), true);
+                echo json_encode($this->update($item, $putData));
             }
         }
         else if('DELETE' === $method){
