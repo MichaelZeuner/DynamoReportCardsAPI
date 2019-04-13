@@ -39,6 +39,11 @@ class ReportCardsComponents extends CRUD
         return $this->getCreateAccess();
     }
 
+    protected function dataManipulationUpdate($data) { 
+        unset($data['id']);
+        return $data;
+    }
+
     protected function getRequiredUpdateData() {
         return ['report_cards_id', 'skills_id', 'rank'];
     }

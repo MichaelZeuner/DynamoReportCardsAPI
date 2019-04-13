@@ -10,26 +10,26 @@ class ReportCards extends CRUD
     }
 
     protected function getRequiredCreateData() {
-        return ['athletes_id', 'levels_id', 'comment'];
+        return ['submitted_by', 'athletes_id', 'levels_id', 'comment'];
     }
     
     protected function getCreateSQL() {
         $date = $this->getCurrentDateTime();
         return 'INSERT INTO '.$this->getTableName().
-                ' (athletes_id, levels_id, comment, updated_date, created_date) VALUES'.
-                " (:athletes_id, :levels_id, :comment, '$date', '$date')";
+                ' (submitted_by, athletes_id, levels_id, comment, updated_date, created_date) VALUES'.
+                " (:submitted_by, :athletes_id, :levels_id, :comment, '$date', '$date')";
     }
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.athletes_id, $table.levels_id, $table.comment, $table.approved, $table.updated_date, $table.created_date FROM $table";
+        return "SELECT $table.id, $table.submitted_by, $table.athletes_id, $table.levels_id, $table.comment, $table.approved, $table.updated_date, $table.created_date FROM $table";
     }
 
     protected function getUpdateAccess() {
         return $this->getCreateAccess();
     }
 
-    protected function dataManipulation($data) { 
+    protected function dataManipulationUpdate($data) { 
         $newData['athletes_id'] = $data['athlete']['id'];
         $newData['levels_id'] = $data['level']['id'];
         $newData['comment'] = $data['comment'];

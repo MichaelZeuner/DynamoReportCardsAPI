@@ -126,13 +126,14 @@ abstract class CRUD
     abstract protected function getUpdateAccess();
     abstract protected function getRequiredUpdateData();
     abstract protected function getUpdateSQL();
+    protected function dataManipulationUpdate($data) { return $data; }
     public function update($item, $data) {
         if(!in_array($this->accessLevel, $this->getUpdateAccess())) {
             http_response_code(HTTP_CODE_NOT_AUTHORIZED);
             return $this->error->createError('NOT AUTHORIZED! Your access level: ' . $this->accessLevel . ', access levels permitted: ' . json_encode($this->getUpdateAccess()));
         }
 
-        $data = $this->dataManipulation($data);
+        $data = $this->dataManipulationUpdate($data);
         if($this->isRequiredData($data, $this->getRequiredUpdateData())) {
             $stmt = $this->pdo->prepare($this->getUpdateSQL());
             $stmt->execute($this->getDataArrayWithId($data, $item));
