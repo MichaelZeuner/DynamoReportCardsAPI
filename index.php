@@ -137,7 +137,7 @@ switch($selector) {
     //others
     switch($url[0]) {
         case 'level-events':
-        $stmt = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON skills.events_id = events.id WHERE levels_id = :id");
+        $stmt = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON skills.events_id = events.id WHERE levels_id = :id AND events.active = 1");
         $stmt->execute(['id' => $item]);
 
         $results = $stmt->fetchAll();
@@ -151,7 +151,7 @@ switch($selector) {
         break;
 
         case 'level-event-skills':
-        $stmt = $pdo->prepare("SELECT DISTINCT id, name FROM skills WHERE levels_id = :levels_id AND events_id = :events_id");
+        $stmt = $pdo->prepare("SELECT DISTINCT id, name FROM skills WHERE levels_id = :levels_id AND events_id = :events_id AND active = 1");
         $stmt->execute(['levels_id' => $url[1], 'events_id' => $url[2]]);
     
         $results = $stmt->fetchAll();

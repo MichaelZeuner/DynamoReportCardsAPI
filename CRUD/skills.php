@@ -24,6 +24,13 @@ class Skills extends CRUD
         return "SELECT $table.id, $table.name FROM $table";
     }
 
+    protected function dataManipulationUpdate($data) {
+        $newData['levels_id'] = $data['levels_id'];
+        $newData['events_id'] = $data['events_id'];
+        $newData['name'] = $data['name'];
+        return $newData; 
+    }
+
     protected function getUpdateAccess() {
         return $this->getCreateAccess();
     }
@@ -36,6 +43,10 @@ class Skills extends CRUD
         return 'UPDATE '.$this->getTableName().
                 ' SET levels_id = :levels_id, events_id = :events_id, name = :name'.
                 ' WHERE id = :id';
+    }
+
+    protected function getDeleteSQL() {
+        return 'UPDATE '.$this->getTableName().' SET active=0 WHERE id = :id';
     }
 
     protected function getDeleteAccess() {

@@ -19,7 +19,7 @@ class Events extends CRUD
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.name FROM $table";
+        return "SELECT $table.id, $table.name FROM $table WHERE active = 1";
     }
 
     protected function getUpdateAccess() {
