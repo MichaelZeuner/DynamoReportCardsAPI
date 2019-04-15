@@ -36,7 +36,7 @@ abstract class CRUD
                     echo json_encode($this->error->createError('Post for a join not supported.'));
                 }
             } else {
-                echo json_encode($this->create($_POST, $join));
+                echo json_encode($this->create($_POST));
             }
         }
         else if('PUT' === $method){
