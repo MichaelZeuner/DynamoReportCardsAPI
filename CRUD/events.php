@@ -30,10 +30,19 @@ class Events extends CRUD
         return ['name'];
     }
     
+    protected function dataManipulationUpdate($data) {
+        $newData['name'] = $data['name'];
+        return $newData; 
+    }
+
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().' SET name = :name WHERE id = :id';
     }
 
+    protected function getDeleteSQL() {
+        return 'UPDATE '.$this->getTableName().' SET active=0 WHERE id = :id';
+    }
+    
     protected function getDeleteAccess() {
         return $this->getCreateAccess();
     }
