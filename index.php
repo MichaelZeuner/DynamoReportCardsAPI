@@ -172,7 +172,36 @@ switch($selector) {
         getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null', ['id' => $url[1]]);
         break;
 
+        case 'update-user-no-password':
+
+        $stmt = $pdo->prepare('UPDATE users SET 
+            username = :username, 
+            email = :email,
+            first_name = :first_name, 
+            last_name = :last_name, 
+            access = :access 
+            WHERE id = :id'
+        );
+
+            
+        $putData = json_decode(file_get_contents("php://input"), true);
+        $stmt->execute([
+            'username' => $putData['username'], 
+            'email' => $putData['email'], 
+            'first_name' => $putData['first_name'], 
+            'last_name' => $putData['last_name'], 
+            'access' => $putData['access'], 
+            'id' => $url[1]
+        ]);
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $users = new Users($pdo, $error);
+        $users->process($item, $join, $accessLevel);
+
+        break;
+
         default:
+        http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
         break;
     }

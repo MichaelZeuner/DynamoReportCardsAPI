@@ -53,6 +53,16 @@ class Users extends CRUD
         return $this->getRequiredCreateData();
     }
     
+    protected function dataManipulationUpdate($data) {
+        $newData['username'] = $data['username'];
+        $newData['password_hash'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        $newData['email'] = $data['email'];
+        $newData['first_name'] = $data['first_name'];
+        $newData['last_name'] = $data['last_name'];
+        $newData['access'] = $data['access'];
+        return $newData; 
+    }
+
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().' SET 
                     username = :username, 
