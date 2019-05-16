@@ -169,7 +169,14 @@ switch($selector) {
         break;
 
         case 'report-cards-completed':
-        getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null', ['id' => $url[1]]);
+        $stmt = $pdo->prepare("SELECT access FROM users WHERE id = :id");
+        $stmt->execute(['id' => $url[1]]);
+        $access = $stmt->fetch()['access'];
+        if($access === 'COACH') {
+            getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null', ['id' => $url[1]]);
+        } else {
+            getReportCards($pdo, $error, 'approved is NOT null');
+        }
         break;
 
         case 'update-user-no-password':
