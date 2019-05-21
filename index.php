@@ -10,6 +10,7 @@ define('ADMIN', 'ADMIN');
 require_once(ROOT . '/helpers/http_codes.php');
 require_once(ROOT . '/helpers/errors.php');
 require_once(ROOT . '/helpers/get-report-cards.php');
+require_once(ROOT . '/helpers/get-printable-report-card.php');
 require_once(ROOT . '/CRUD/CRUD.php');
 
 //header("Access-Control-Allow-Headers: Authorization");
@@ -205,6 +206,28 @@ switch($selector) {
         $users = new Users($pdo, $error);
         $users->process($item, $join, $accessLevel);
 
+        break;
+
+        case 'get-athletes-recent-report-cards':
+        $stmt = $pdo->prepare("SELECT id, created_date FROM report_cards WHERE athletes_id = :athletes_id ORDER BY created_date DESC");
+        $stmt->execute(['athletes_id' => $url[1]]);
+    
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            http_response_code(HTTP_CODE_NOT_FOUND);
+            $error->echoError('No data found');
+        } else {
+            http_response_code(HTTP_CODE_OK);
+            echo json_encode($results);
+        }
+        break;
+
+        case 'report-cards-components-for-report-card':
+        getReportCards($pdo, $error, 'id = :id', ['id' => $url[1]]);
+        break;
+
+        case 'printable-report-card':
+        getPrintableReportCard($pdo, $error, $url[1]);
         break;
 
         default:
