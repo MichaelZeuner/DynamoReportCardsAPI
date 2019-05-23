@@ -4,9 +4,37 @@ function getPrintableReportCard($pdo, $error, $athleteId) {
     $printableReportCard = [];
     $printableReportCard['levels'] = getRecentLevel($pdo, $error, $athleteId);
     $printableReportCard['events'] = getEvents($pdo, $error, $printableReportCard['levels'], $athleteId);
-    $printableReportCard['coachComments'] = [];
+    $printableReportCard['coachComments'] = getCoachComments($pdo, $error, $athleteId);
+    $printableReportCard['athlete'] = getAthlete($pdo, $error, $athleteId);
 
     echo json_encode($printableReportCard);
+}
+
+function getAthlete($pdo, $error, $athleteId) {
+    $stmt = $pdo->prepare("SELECT first_name, last_name FROM athletes WHERE id = :athletes_id");
+    $stmt->execute(['athletes_id' => $athleteId]);
+
+    $athlete = $stmt->fetch();
+    if(count($athlete) == 0) {
+        http_response_code(HTTP_CODE_NOT_FOUND);
+        $error->echoError('No athlete found when attempting to generate printable report card... getAthlete()');
+    } else {
+        return $athlete['first_name'] . ' ' . $athlete['last_name'];
+    }
+}
+
+function getCoachComments($pdo, $error, $athleteId) {
+    $numberOfComments = 5;
+    $stmt = $pdo->prepare("SELECT name AS level_name, first_name, last_name, comment, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT $numberOfComments");
+    $stmt->execute(['athletes_id' => $athleteId]);
+
+    $comments = $stmt->fetchAll();
+    if(count($comments) == 0) {
+        http_response_code(HTTP_CODE_NOT_FOUND);
+        $error->echoError('No coaches comments found when attempting to generate printable report card... getCoachComments()');
+    } else {
+        return $comments;
+    }
 }
 
 function getEvents($pdo, $error, $levels, $athleteId) {
