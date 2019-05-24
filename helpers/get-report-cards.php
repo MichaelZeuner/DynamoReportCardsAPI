@@ -1,12 +1,12 @@
 <?php
 
 function getReportCards($pdo, $error, $where, $arr = []) {
-    $stmt = $pdo->prepare("SELECT * FROM report_cards WHERE $where");
+    $stmt = $pdo->prepare("SELECT report_cards.id, submitted_by, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, day_of_week, approved, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, updated_date, created_date FROM report_cards INNER JOIN users suser ON suser.id = submitted_by LEFT JOIN users auser ON auser.id = approved WHERE $where ORDER BY updated_date DESC");
     $stmt->execute($arr);
     $results = $stmt->fetchAll();
     if(count($results) == 0) {
         http_response_code(HTTP_CODE_NOT_FOUND);
-        $error->echoError('No data found');
+        $error->echoError("No data found with WHERE $where");
     } else {
         for($i=0; $i<count($results); $i++) {
             $report_card = $results[$i];

@@ -25,7 +25,7 @@ function getAthlete($pdo, $error, $athleteId) {
 
 function getCoachComments($pdo, $error, $athleteId) {
     $numberOfComments = 5;
-    $stmt = $pdo->prepare("SELECT name AS level_name, first_name, last_name, comment, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT $numberOfComments");
+    $stmt = $pdo->prepare("SELECT name AS level_name, first_name, last_name, comment, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id AND approved IS NOT null ORDER BY updated_date DESC LIMIT $numberOfComments");
     $stmt->execute(['athletes_id' => $athleteId]);
 
     $comments = $stmt->fetchAll();
@@ -33,6 +33,18 @@ function getCoachComments($pdo, $error, $athleteId) {
         http_response_code(HTTP_CODE_NOT_FOUND);
         $error->echoError('No coaches comments found when attempting to generate printable report card... getCoachComments()');
     } else {
+        if(count($comments) < $numberOfComments) {
+            $empty = [];
+            $empty['level_name'] = 'empty';
+            $empty['first_name'] = '';
+            $empty['last_name'] = '';
+            $empty['comment'] = '';
+            $empty['update_date'] = '';
+            $commentsCount = count($comments);
+            for($i=0; $i < $numberOfComments - $commentsCount; $i++) {
+                array_push($comments, $empty);
+            }
+        }
         return $comments;
     }
 }
@@ -107,7 +119,7 @@ function getEventsSkills($pdo, $error, $levels, $events, $athleteId) {
 }
 
 function getAthletesRankForSkill($pdo, $error, $skillId, $athleteId) {
-    $stmt = $pdo->prepare("SELECT rank FROM report_cards INNER JOIN report_cards_components ON report_cards.id = report_cards_components.report_cards_id WHERE athletes_id = :athletes_id AND skills_id = :skills_id");
+    $stmt = $pdo->prepare("SELECT rank FROM report_cards INNER JOIN report_cards_components ON report_cards.id = report_cards_components.report_cards_id WHERE athletes_id = :athletes_id AND skills_id = :skills_id AND approved IS NOT null");
     $stmt->execute(['athletes_id' => $athleteId, 'skills_id' => $skillId]);
 
     $ranks = $stmt->fetchAll();
@@ -122,7 +134,7 @@ function getAthletesRankForSkill($pdo, $error, $skillId, $athleteId) {
 }
 
 function getRecentLevel($pdo, $error, $athleteId) {
-    $stmt = $pdo->prepare("SELECT levels.id, name FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id WHERE athletes_id = :athletes_id ORDER BY created_date LIMIT 1");
+    $stmt = $pdo->prepare("SELECT levels.id, name FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT 1");
     $stmt->execute(['athletes_id' => $athleteId]);
 
     $levelName = $stmt->fetch();
@@ -152,7 +164,7 @@ function getRecentLevel($pdo, $error, $athleteId) {
                     if($allLevels[$i]['name'] === $levelName['name']) {
                         //this is the ideal senario
                         if($i >= $PREVIOUS_LEVELS && count($allLevels) - ($i+1) >= $FUTURE_LEVELS) {
-                            for($x = $i-$PREVIOUS_LEVELS; $x < $FULL; $x++) {
+                            for($x = $i-$PREVIOUS_LEVELS; $x < $FULL + ($i-$PREVIOUS_LEVELS); $x++) {
                                 array_push($levelNames, $allLevels[$x]);
                             }
                             return $levelNames;

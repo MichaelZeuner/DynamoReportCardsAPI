@@ -33,7 +33,6 @@ class ReportCards extends CRUD
         $newData['athletes_id'] = $data['athlete']['id'];
         $newData['levels_id'] = $data['level']['id'];
         $newData['comment'] = $data['comment'];
-        $newData['day_of_week'] = $data['day_of_week'];
         $newData['approved'] = $data['approved'];
         return $newData; 
     }
