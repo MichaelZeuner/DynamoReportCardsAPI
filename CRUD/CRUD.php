@@ -4,6 +4,7 @@ require_once(ROOT . '/helpers/InputParse.php');
 require_once(ROOT . '/CRUD/users.php');
 require_once(ROOT . '/CRUD/athletes.php');
 require_once(ROOT . '/CRUD/levels.php');
+require_once(ROOT . '/CRUD/level_groups.php');
 require_once(ROOT . '/CRUD/events.php');
 require_once(ROOT . '/CRUD/skills.php');
 require_once(ROOT . '/CRUD/report-cards.php');

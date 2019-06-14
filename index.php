@@ -108,6 +108,11 @@ switch($selector) {
     $athletes->process($item, $join, $accessLevel);
     break;
 
+    case 'level_groups':
+    $levelGroups = new LevelGroups($pdo, $error);
+    $levelGroups->process($item, $join, $accessLevel);
+    break;
+
     case 'levels':
     $levels = new Levels($pdo, $error);
     $levels->process($item, $join, $accessLevel);
