@@ -166,7 +166,7 @@ switch($selector) {
         break;
 
         case 'report-cards-requiring-approval':
-        getReportCards($pdo, $error, 'approved is null');
+        getReportCards($pdo, $error, 'approved is null', [], 'submitted_by');
         break;
 
         case 'report-cards-completed':
