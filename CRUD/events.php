@@ -14,7 +14,7 @@ class Events extends CRUD
     }
     
     protected function getCreateSQL() {
-        return 'INSERT INTO '.$this->getTableName().' (name) VALUES (:name)';
+        return 'INSERT INTO '.$this->getTableName().' (name, active) VALUES (:name, 1)';
     }
 
     protected function getReadSQL() {

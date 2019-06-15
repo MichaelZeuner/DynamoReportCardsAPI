@@ -15,8 +15,8 @@ class Skills extends CRUD
     
     protected function getCreateSQL() {
         return 'INSERT INTO '.$this->getTableName().
-                ' (levels_id, events_id, name) VALUES'.
-                ' (:levels_id, :events_id, :name)';
+                ' (levels_id, events_id, name, active) VALUES'.
+                ' (:levels_id, :events_id, :name, 1)';
     }
 
     protected function getReadSQL() {

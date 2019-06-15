@@ -14,7 +14,7 @@ class Levels extends CRUD
     }
     
     protected function getCreateSQL() {
-        return 'INSERT INTO '.$this->getTableName().' (level_groups_id, level_number) VALUES (:level_groups_id, :level_number)';
+        return 'INSERT INTO '.$this->getTableName().' (level_groups_id, level_number, active) VALUES (:level_groups_id, :level_number, 1)';
     }
 
     protected function getReadSQL() {
