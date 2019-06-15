@@ -25,7 +25,7 @@ function getAthlete($pdo, $error, $athleteId) {
 
 function getCoachComments($pdo, $error, $athleteId) {
     $numberOfComments = 5;
-    $stmt = $pdo->prepare("SELECT name AS level_name, first_name, last_name, comment, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id AND approved IS NOT null ORDER BY updated_date DESC LIMIT $numberOfComments");
+    $stmt = $pdo->prepare("SELECT name AS level_name, level_number, first_name, last_name, comment, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id AND approved IS NOT null ORDER BY updated_date DESC LIMIT $numberOfComments");
     $stmt->execute(['athletes_id' => $athleteId]);
 
     $comments = $stmt->fetchAll();
@@ -134,7 +134,7 @@ function getAthletesRankForSkill($pdo, $error, $skillId, $athleteId) {
 }
 
 function getRecentLevel($pdo, $error, $athleteId) {
-    $stmt = $pdo->prepare("SELECT levels.id, name FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT 1");
+    $stmt = $pdo->prepare("SELECT levels.id, name, level_number FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT 1");
     $stmt->execute(['athletes_id' => $athleteId]);
 
     $levelName = $stmt->fetch();
@@ -142,9 +142,8 @@ function getRecentLevel($pdo, $error, $athleteId) {
         http_response_code(HTTP_CODE_NOT_FOUND);
         $error->echoError('No recent level found when attempting to generate printable report card... getRecentLevel() [1]');
     } else {
-        $levelNameSplit = explode(' ', $levelName['name']);
-        $stmt2 = $pdo->prepare("SELECT id, name FROM `levels` WHERE name LIKE :name ORDER BY name ASC");
-        $stmt2->execute(['name' => $levelNameSplit[0].'%']);
+        $stmt2 = $pdo->prepare("SELECT levels.id, name, level_number FROM `levels` INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE name LIKE :name ORDER BY level_number ASC");
+        $stmt2->execute(['name' => $levelName['name']]);
 
         $allLevels = $stmt2->fetchAll();
 
@@ -161,7 +160,7 @@ function getRecentLevel($pdo, $error, $athleteId) {
                 if(count($allLevels) <= $FULL) {
                     array_push($levelNames, $allLevels[$i]);
                 } else {
-                    if($allLevels[$i]['name'] === $levelName['name']) {
+                    if($allLevels[$i]['level_number'] === $levelName['level_number']) {
                         //this is the ideal senario
                         if($i >= $PREVIOUS_LEVELS && count($allLevels) - ($i+1) >= $FUTURE_LEVELS) {
                             for($x = $i-$PREVIOUS_LEVELS; $x < $FULL + ($i-$PREVIOUS_LEVELS); $x++) {
