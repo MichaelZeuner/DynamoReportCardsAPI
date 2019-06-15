@@ -108,7 +108,7 @@ switch($selector) {
     $athletes->process($item, $join, $accessLevel);
     break;
 
-    case 'level_groups':
+    case 'level-groups':
     $levelGroups = new LevelGroups($pdo, $error);
     $levelGroups->process($item, $join, $accessLevel);
     break;
@@ -142,6 +142,20 @@ switch($selector) {
 
     //others
     switch($url[0]) {
+        case 'read-levels':
+        $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1");
+        $stmt->execute();
+
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            http_response_code(HTTP_CODE_NOT_FOUND);
+            $error->echoError('No data found');
+        } else {
+            http_response_code(HTTP_CODE_OK);
+            echo json_encode($results);
+        }
+        break;
+
         case 'level-events':
         $stmt = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON skills.events_id = events.id WHERE levels_id = :id AND events.active = 1");
         $stmt->execute(['id' => $item]);

@@ -27,16 +27,17 @@ class Levels extends CRUD
     }
 
     protected function getRequiredUpdateData() {
-        return ['level_number'];
+        return $this->getRequiredCreateData();
     }
     
     protected function dataManipulationUpdate($data) {
+        $newData['level_groups_id'] = $data['level_groups_id'];
         $newData['level_number'] = $data['level_number'];
         return $newData; 
     }
 
     protected function getUpdateSQL() {
-        return 'UPDATE '.$this->getTableName().' SET level_number = :level_number WHERE id = :id';
+        return 'UPDATE '.$this->getTableName().' SET level_number = :level_number, level_groups_id = :level_groups_id WHERE id = :id';
     }
 
     protected function getDeleteAccess() {
