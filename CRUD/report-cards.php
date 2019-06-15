@@ -10,19 +10,19 @@ class ReportCards extends CRUD
     }
 
     protected function getRequiredCreateData() {
-        return ['submitted_by', 'athletes_id', 'levels_id', 'comment', 'day_of_week'];
+        return ['submitted_by', 'athletes_id', 'levels_id', 'comment', 'day_of_week', 'session'];
     }
     
     protected function getCreateSQL() {
         $date = $this->getCurrentDateTime();
         return 'INSERT INTO '.$this->getTableName().
-                ' (submitted_by, athletes_id, levels_id, comment, day_of_week, updated_date, created_date) VALUES'.
-                " (:submitted_by, :athletes_id, :levels_id, :comment, :day_of_week, '$date', '$date')";
+                ' (submitted_by, athletes_id, levels_id, comment, day_of_week, session, updated_date, created_date) VALUES'.
+                " (:submitted_by, :athletes_id, :levels_id, :comment, :day_of_week, :session, '$date', '$date')";
     }
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.submitted_by, $table.athletes_id, $table.levels_id, $table.comment, $table.day_of_week, $table.approved, $table.updated_date, $table.created_date FROM $table";
+        return "SELECT $table.id, $table.submitted_by, $table.athletes_id, $table.levels_id, $table.comment, $table.day_of_week, $table.session, $table.approved, $table.updated_date, $table.created_date FROM $table";
     }
 
     protected function getUpdateAccess() {
