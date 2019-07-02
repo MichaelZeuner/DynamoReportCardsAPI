@@ -53,7 +53,7 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
 
     if (isset($username) && isset($password)) {
         
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username AND active = 1 LIMIT 1");
         $stmt->execute([ "username" => $username ]);
         $user = $stmt->fetch();
         if(isset($user) && isset($user['password_hash'])) {
@@ -182,6 +182,15 @@ switch($selector) {
             http_response_code(HTTP_CODE_OK);
             echo json_encode($results);
         }
+        break;
+
+        case 'athletes-attempts-at-level':
+        $stmt = $pdo->prepare("SELECT count(id) AS attempts FROM report_cards WHERE athletes_id = :athletes_id AND levels_id = :levels_id");
+        $stmt->execute(['athletes_id' => $url[1], 'levels_id' => $url[2]]);
+    
+        $results = $stmt->fetch();
+        http_response_code(HTTP_CODE_OK);
+        echo json_encode($results['attempts']);
         break;
 
         case 'report-cards-requiring-approval':

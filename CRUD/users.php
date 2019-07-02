@@ -31,9 +31,9 @@ class Users extends CRUD
     protected function getCreateSQL() {
         return 'INSERT INTO '.$this->getTableName().
                 ' (username, password_hash, email, 
-                    first_name, last_name, access) VALUES'.
+                    first_name, last_name, access, active) VALUES'.
                 ' (:username, :password_hash, :email, 
-                    :first_name, :last_name, :access)';
+                    :first_name, :last_name, :access, 1)';
     }
 
     protected function getReadAccess() {
@@ -42,7 +42,7 @@ class Users extends CRUD
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT * FROM $table";
+        return "SELECT * FROM $table WHERE active = 1";
     }
 
     protected function getUpdateAccess() {
@@ -72,6 +72,10 @@ class Users extends CRUD
                     last_name = :last_name, 
                     access = :access '.
                 ' WHERE id = :id';
+    }
+
+    protected function getDeleteSQL() {
+        return 'UPDATE '.$this->getTableName().' SET active=0 WHERE id = :id';
     }
 
     protected function getDeleteAccess() {
