@@ -9,6 +9,8 @@ require_once(ROOT . '/CRUD/events.php');
 require_once(ROOT . '/CRUD/skills.php');
 require_once(ROOT . '/CRUD/report-cards.php');
 require_once(ROOT . '/CRUD/report-cards-components.php');
+require_once(ROOT . '/CRUD/report-cards-mod.php');
+require_once(ROOT . '/CRUD/report-cards-mod-components.php');
 
 abstract class CRUD
 {
