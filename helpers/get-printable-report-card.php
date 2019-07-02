@@ -126,8 +126,8 @@ function getAthletesRankForSkill($pdo, $error, $skillId, $athleteId) {
     $rank = '';
     if(count($ranks) > 0) {
         for($i=0; $i<count($ranks); $i++) {
-            if($rank === 'M') { break; }
             $rank = substr($ranks[$i]['rank'], 0, 1);
+            if($rank === 'M') { break; }
         }
     }
     return $rank;
