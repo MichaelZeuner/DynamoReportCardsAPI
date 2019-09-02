@@ -10,6 +10,7 @@ define('ADMIN', 'ADMIN');
 require_once(ROOT . '/helpers/http_codes.php');
 require_once(ROOT . '/helpers/errors.php');
 require_once(ROOT . '/helpers/get-report-cards.php');
+require_once(ROOT . '/helpers/get-report-cards-sent-back.php');
 require_once(ROOT . '/helpers/get-printable-report-card.php');
 require_once(ROOT . '/CRUD/CRUD.php');
 
@@ -138,6 +139,16 @@ switch($selector) {
     $reportCardsComponents->process($item, $join, $accessLevel);
     break;
 
+    case 'report-card-mod':
+    $reportCardsMod = new ReportCardsMod($pdo, $error);
+    $reportCardsMod->process($item, $join, $accessLevel);
+    break;
+
+    case 'report-card-mod-components':
+    $reportCardsModComponents = new ReportCardsModComponents($pdo, $error);
+    $reportCardsModComponents->process($item, $join, $accessLevel);
+    break;
+
     default:
 
     //others
@@ -194,7 +205,11 @@ switch($selector) {
         break;
 
         case 'report-cards-requiring-approval':
-        getReportCards($pdo, $error, 'approved is null', [], 'submitted_by');
+        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null', [], 'submitted_by');
+        break;
+
+        case 'report-cards-sent-back':
+        getReportCardsSentBack($pdo, $error, $url[1]);
         break;
 
         case 'report-cards-completed':

@@ -17,10 +17,12 @@ abstract class CRUD
     public $pdo;
     protected $error;
     protected $accessLevel = NONE;
+    protected $errMsg = '';
 
     function __construct($pdo, $error) {
         $this->pdo = $pdo;
         $this->error = $error;
+        $this->errMsg = '';
     }
 
     public function process($item, $join, $accessLevel) {
@@ -146,7 +148,7 @@ abstract class CRUD
             return $this->read($item, null);
         } else {
             http_response_code(HTTP_CODE_BAD_REQUEST);
-            return $this->error->createError('Data mismatch. Required data: ' . json_encode($this->getRequiredUpdateData()) . ' Found data: ' . json_encode(array_keys($data)));
+            return $this->error->createError($this->errMsg . ' Data mismatch. Required data: ' . json_encode($this->getRequiredUpdateData()) . ' Found data: ' . json_encode(array_keys($data)));
         }
     }
     
@@ -192,12 +194,14 @@ abstract class CRUD
     public function isRequiredData($data, $requiredData) {
         if(count($data) === count($requiredData)) {
             foreach($requiredData as $req) {
-                if(isset($data[$req]) === false) {
+                if(array_key_exists($req, $data) === false) {
+                    $this->errMsg = 'MISSING: '.$req;
                     return false;
                 }
             }
             return true;
         } else {
+            $this->errMsg = 'COUNT WRONG';
             return false;
         }
     }

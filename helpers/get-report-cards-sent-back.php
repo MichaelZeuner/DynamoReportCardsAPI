@@ -1,17 +1,14 @@
 <?php
 
-function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC') {
+function getReportCardsSentBack($pdo, $error, $coach_id) {
     $stmt = $pdo->prepare(
-        "SELECT report_cards.id, submitted_by, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, 
-                day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
+        'SELECT report_cards_id, submitted_by, athletes_id, levels_id, comment, comment_modifications, updated_date, status, report_cards_mod.id AS report_cards_mod_id
         FROM report_cards 
-        INNER JOIN users suser ON suser.id = submitted_by 
-        LEFT JOIN users auser ON auser.id = approved 
         LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
-        WHERE $where 
-        ORDER BY $orderBy");
-        
-    $stmt->execute($arr);
+        WHERE submitted_by = :coach_id AND comment_modifications IS NOT null
+        ORDER BY updated_date DESC');
+
+    $stmt->execute(['coach_id' => $coach_id]);
     $results = $stmt->fetchAll();
     if(count($results) == 0) {
         http_response_code(HTTP_CODE_NOT_FOUND);
@@ -31,11 +28,16 @@ function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_dat
             unset($report_card['levels_id']);
 
             $stmtEvents = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON events.id = skills.events_id INNER JOIN report_cards_components ON report_cards_components.skills_id = skills.id WHERE report_cards_id = :report_cards_id");
-            $stmtEvents->execute(['report_cards_id' => $report_card['id']]);
+            $stmtEvents->execute(['report_cards_id' => $report_card['report_cards_id']]);
             $report_card['events'] = $stmtEvents->fetchAll();
 
-            $stmtComponenets = $pdo->prepare("SELECT * FROM report_cards_components WHERE report_cards_id = :report_cards_id");
-            $stmtComponenets->execute(['report_cards_id' => $report_card['id']]);
+            $stmtComponenets = $pdo->prepare(
+                'SELECT report_cards_components.id AS report_cards_components_id, report_cards_mod_components.id AS report_cards_mod_components_id, skills_id, rank, suggested_rank
+                FROM report_cards_components 
+                LEFT JOIN report_cards_mod_components ON report_cards_components.id = report_cards_mod_components.report_cards_components_id 
+                WHERE report_cards_id = :report_cards_id');
+
+            $stmtComponenets->execute(['report_cards_id' => $report_card['report_cards_id']]);
             $report_card['components'] = $stmtComponenets->fetchAll();
 
             for($x=0; $x<count($report_card['components']); $x++) {
@@ -44,15 +46,14 @@ function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_dat
                 $stmtSkill = $pdo->prepare('SELECT * FROM skills WHERE id = :skills_id');
                 $stmtSkill->execute(['skills_id' => $component['skills_id']]);
                 $component['skill'] = $stmtSkill->fetch();
-                unset($report_card['components']['skills_id']);
+                unset($component['skills_id']);
 
                 $report_card['components'][$x] = $component;
             }
 
             $results[$i] = $report_card;
         }
-
-        http_response_code(HTTP_CODE_OK);
-        echo json_encode($results);
     }
+    http_response_code(HTTP_CODE_OK);
+    echo json_encode($results);
 }

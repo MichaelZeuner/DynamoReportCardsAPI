@@ -1,8 +1,8 @@
 <?php
-class ReportCardsMod extends CRUD
+class ReportCardsModComponents extends CRUD
 {
     public static function getTableName() {
-        return 'report_cards_mod';
+        return 'report_cards_mod_components';
     }
 
     protected function getCreateAccess() {
@@ -10,18 +10,18 @@ class ReportCardsMod extends CRUD
     }
 
     protected function getRequiredCreateData() {
-        return ['report_cards_id', 'comment_modifications'];
+        return ['report_cards_components_id', 'suggested_rank'];
     }
     
     protected function getCreateSQL() {
         return 'INSERT INTO '.$this->getTableName().
-                ' (report_cards_id, comment_modifications) VALUES'.
-                " (:report_cards_id, :comment_modifications)";
+                ' (report_cards_components_id, suggested_rank) VALUES'.
+                " (:report_cards_components_id, :suggested_rank)";
     }
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.report_cards_id, $table.comment_modifications FROM $table";
+        return "SELECT $table.id, $table.report_cards_components_id, $table.suggested_rank FROM $table";
     }
 
     protected function getUpdateAccess() {
@@ -29,16 +29,18 @@ class ReportCardsMod extends CRUD
     }
 
     protected function dataManipulationUpdate($data) { 
-        $newData['comment_modifications'] = $data['comment_modifications'];
+        $newData['suggested_rank'] = $data['suggested_rank'];
         return $newData; 
     }
 
+
     protected function getRequiredUpdateData() {
-        return ['comment_modifications'];
+        return ['suggested_rank'];
     }
     
     protected function getUpdateSQL() {
-        return 'UPDATE '.$this->getTableName().' SET comment_modifications = :comment_modifications WHERE id = :id';
+        return 'UPDATE '.$this->getTableName().
+                ' SET suggested_rank = :suggested_rank WHERE id = :id';
     }
 
     protected function getDeleteAccess() {
