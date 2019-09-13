@@ -149,6 +149,16 @@ switch($selector) {
     $reportCardsModComponents->process($item, $join, $accessLevel);
     break;
 
+    case 'report-cards-comments':
+    $reportCardsComments = new ReportCardsComments($pdo, $error);
+    $reportCardsComments->process($item, $join, $accessLevel);
+    break;
+
+    case 'comments':
+    $comments = new Comments($pdo, $error);
+    $comments->process($item, $join, $accessLevel);
+    break;
+
     default:
 
     //others

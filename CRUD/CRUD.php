@@ -11,6 +11,8 @@ require_once(ROOT . '/CRUD/report-cards.php');
 require_once(ROOT . '/CRUD/report-cards-components.php');
 require_once(ROOT . '/CRUD/report-cards-mod.php');
 require_once(ROOT . '/CRUD/report-cards-mod-components.php');
+require_once(ROOT . '/CRUD/report-cards-comments.php');
+require_once(ROOT . '/CRUD/comments.php');
 
 abstract class CRUD
 {
