@@ -27,6 +27,10 @@ abstract class CRUD
         $this->errMsg = '';
     }
 
+    public function setAccessLevel($accessLevel) {
+        $this->accessLevel = $accessLevel;
+    }
+
     public function process($item, $join, $accessLevel) {
         $this->accessLevel = $accessLevel;
         $method = $_SERVER['REQUEST_METHOD'];

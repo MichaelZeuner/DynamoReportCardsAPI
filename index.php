@@ -13,6 +13,7 @@ require_once(ROOT . '/helpers/get-report-cards.php');
 require_once(ROOT . '/helpers/get-report-cards-sent-back.php');
 require_once(ROOT . '/helpers/get-printable-report-card.php');
 require_once(ROOT . '/CRUD/CRUD.php');
+require_once(ROOT . '/CRUD/commentsCRUD.php');
 
 //header("Access-Control-Allow-Headers: Authorization");
 //header("Content-Type: application/json; charset=UTF-8");
@@ -154,11 +155,6 @@ switch($selector) {
     $reportCardsComments->process($item, $join, $accessLevel);
     break;
 
-    case 'comments':
-    $comments = new Comments($pdo, $error);
-    $comments->process($item, $join, $accessLevel);
-    break;
-
     default:
 
     //others
@@ -206,12 +202,7 @@ switch($selector) {
         break;
 
         case 'athletes-attempts-at-level':
-        $stmt = $pdo->prepare("SELECT count(id) AS attempts FROM report_cards WHERE athletes_id = :athletes_id AND levels_id = :levels_id");
-        $stmt->execute(['athletes_id' => $url[1], 'levels_id' => $url[2]]);
-    
-        $results = $stmt->fetch();
-        http_response_code(HTTP_CODE_OK);
-        echo json_encode($results['attempts']);
+        getReportCards($pdo, $error, 'athletes_id = :athletes_id AND levels_id = :levels_id', ['athletes_id' => $url[1], 'levels_id' => $url[2]]);
         break;
 
         case 'report-cards-requiring-approval':
@@ -283,6 +274,18 @@ switch($selector) {
         getPrintableReportCard($pdo, $error, $url[1]);
         break;
 
+        case 'get-comments':
+        echo json_encode(getComments($pdo, $error, $accessLevel, $item));
+        break;
+
+        case 'put-comments':
+        echo json_encode(putComments($pdo, $error, $accessLevel));
+        break;
+
+        case 'add-comments':
+            echo json_encode(addComments($pdo, $error, $accessLevel));
+        break;
+
         default:
         http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
@@ -290,4 +293,4 @@ switch($selector) {
     }
 
     break;
-}
+} 

@@ -20,12 +20,18 @@ function getReportCardsSentBack($pdo, $error, $coach_id) {
             $stmtAthlete = $pdo->prepare('SELECT * FROM athletes WHERE id = :athlete_id');
             $stmtAthlete->execute(['athlete_id' => $report_card['athletes_id']]);
             $report_card['athlete'] = $stmtAthlete->fetch();
-            unset($report_card['athletes_id']);
 
             $stmtLevel = $pdo->prepare('SELECT levels.id, name, level_groups.id AS level_groups_id, level_number FROM levels INNER JOIN level_groups ON level_groups.id = levels.level_groups_id WHERE levels.id = :levels_id');
             $stmtLevel->execute(['levels_id' => $report_card['levels_id']]);
             $report_card['level'] = $stmtLevel->fetch();
-            unset($report_card['levels_id']);
+
+            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
+            $stmtLevel->execute(['comment' => $report_card['comment']]);
+            $report_card['card_comments'] = $stmtLevel->fetch();
+
+            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment_modifications');
+            $stmtLevel->execute(['comment_modifications' => $report_card['comment_modifications']]);
+            $report_card['card_mod_comments'] = $stmtLevel->fetch();
 
             $stmtEvents = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON events.id = skills.events_id INNER JOIN report_cards_components ON report_cards_components.skills_id = skills.id WHERE report_cards_id = :report_cards_id");
             $stmtEvents->execute(['report_cards_id' => $report_card['report_cards_id']]);
