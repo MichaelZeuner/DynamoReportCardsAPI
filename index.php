@@ -206,7 +206,7 @@ switch($selector) {
         break;
 
         case 'report-cards-requiring-approval':
-        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null', [], 'submitted_by');
+        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null AND partial = 0', [], 'submitted_by');
         break;
 
         case 'report-cards-sent-back':
@@ -218,9 +218,9 @@ switch($selector) {
         $stmt->execute(['id' => $url[1]]);
         $access = $stmt->fetch()['access'];
         if($access === 'COACH') {
-            getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null', ['id' => $url[1]]);
+            getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null AND partial = 0', ['id' => $url[1]]);
         } else {
-            getReportCards($pdo, $error, 'approved is NOT null');
+            getReportCards($pdo, $error, 'approved is NOT null AND partial = 0');
         }
         break;
 

@@ -3,7 +3,7 @@
 function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC') {
     $stmt = $pdo->prepare(
         "SELECT report_cards.id, submitted_by, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, 
-                day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
+                day_of_week, approved, status, partial, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
         FROM report_cards 
         INNER JOIN users suser ON suser.id = submitted_by 
         LEFT JOIN users auser ON auser.id = approved 
