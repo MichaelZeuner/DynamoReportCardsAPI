@@ -20,8 +20,6 @@ require_once(ROOT . '/CRUD/commentsCRUD.php');
 //header("Access-Control-Allow-Methods: POST");
 //header("Access-Control-Allow-Origin: *");
 
-
-
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
     header('Access-Control-Allow-Credentials: true');
@@ -37,8 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers:        {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 }
-
-
 
 
 $error = new ErrorProcess();
@@ -159,6 +155,13 @@ switch($selector) {
 
     //others
     switch($url[0]) {
+        case 'delete-report-card-components':
+        $stmt = $pdo->prepare("DELETE FROM report_cards_components WHERE report_cards_id = :report_cards_id");
+        $stmt->execute(['report_cards_id' => $item]);
+
+        http_response_code(HTTP_CODE_NO_CONTENT);
+        break;
+
         case 'read-levels':
         $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1");
         $stmt->execute();
@@ -206,7 +209,7 @@ switch($selector) {
         break;
 
         case 'report-cards-requiring-approval':
-        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null AND partial = 0', [], 'submitted_by');
+        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null AND status != "Partial"', [], 'submitted_by');
         break;
 
         case 'report-cards-sent-back':
@@ -218,9 +221,9 @@ switch($selector) {
         $stmt->execute(['id' => $url[1]]);
         $access = $stmt->fetch()['access'];
         if($access === 'COACH') {
-            getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null AND partial = 0', ['id' => $url[1]]);
+            getReportCards($pdo, $error, 'submitted_by = :id AND approved is NOT null AND status != "Partial"', ['id' => $url[1]]);
         } else {
-            getReportCards($pdo, $error, 'approved is NOT null AND partial = 0');
+            getReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"');
         }
         break;
 
