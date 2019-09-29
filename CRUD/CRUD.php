@@ -125,9 +125,11 @@ abstract class CRUD
             $results = $stmt->fetchAll();
         }
 
-        if(count($results) == 0) {
-            http_response_code(HTTP_CODE_NOT_FOUND);
-            return $this->error->createError('No data found');
+        if(is_array($results)){
+            if(count($results) == 0) {
+                http_response_code(HTTP_CODE_NOT_FOUND);
+                return $this->error->createError('No data found');
+            }
         }
         
         http_response_code(HTTP_CODE_OK);

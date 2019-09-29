@@ -155,6 +155,18 @@ switch($selector) {
 
     //others
     switch($url[0]) {
+        case 'delete-report-card':
+        $stmt = $pdo->prepare("DELETE FROM report_cards_components WHERE report_cards_id = :report_cards_id");
+        $stmt->execute(['report_cards_id' => $item]);
+
+        $stmt = $pdo->prepare("DELETE FROM report_cards WHERE id = :report_cards_id");
+        $stmt->execute(['report_cards_id' => $item]);
+        break;
+
+        case 'coaches-in-progress-cards':
+        getReportCards($pdo, $error, 'submitted_by = :coach_id AND status = :partial', ['coach_id' => $url[1], 'partial' => 'Partial'], 'updated_date DESC', true);
+        break;
+
         case 'delete-report-card-components':
         $stmt = $pdo->prepare("DELETE FROM report_cards_components WHERE report_cards_id = :report_cards_id");
         $stmt->execute(['report_cards_id' => $item]);
@@ -205,7 +217,7 @@ switch($selector) {
         break;
 
         case 'athletes-attempts-at-level':
-        getReportCards($pdo, $error, 'athletes_id = :athletes_id AND levels_id = :levels_id', ['athletes_id' => $url[1], 'levels_id' => $url[2]]);
+        getReportCards($pdo, $error, 'athletes_id = :athletes_id AND levels_id = :levels_id', ['athletes_id' => $url[1], 'levels_id' => $url[2]], 'updated_date DESC', true);
         break;
 
         case 'report-cards-requiring-approval':
