@@ -37,6 +37,7 @@ class ReportCards extends CRUD
             $newData['approved'] = $data['approved'];
             $newData['status'] = $data['status'];
             $newData['session'] = $data['session'];
+            $newData['day_of_week'] = $data['day_of_week'];
             return $newData; 
         }
         else {
@@ -46,18 +47,19 @@ class ReportCards extends CRUD
             $newData['approved'] = $data['approved'];
             $newData['status'] = $data['status'];
             $newData['session'] = $data['session'];
+            $newData['day_of_week'] = $data['day_of_week'];
             return $newData;
         }
     }
 
     protected function getRequiredUpdateData() {
-        return ['athletes_id', 'levels_id', 'comment', 'approved', 'status', 'session'];
+        return ['athletes_id', 'levels_id', 'comment', 'approved', 'status', 'session', 'day_of_week'];
     }
     
     protected function getUpdateSQL() {
         $date = $this->getCurrentDateTime();
         return 'UPDATE '.$this->getTableName().
-                " SET athletes_id = :athletes_id, levels_id = :levels_id, comment = :comment, approved = :approved, status = :status, session = :session, updated_date = '$date'".
+                " SET athletes_id = :athletes_id, levels_id = :levels_id, comment = :comment, approved = :approved, status = :status, session = :session, day_of_week = :day_of_week, updated_date = '$date'".
                 ' WHERE id = :id';
     }
 
