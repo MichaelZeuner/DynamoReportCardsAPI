@@ -2,7 +2,7 @@
 
 function getReportCardsSentBack($pdo, $error, $coach_id) {
     $stmt = $pdo->prepare(
-        'SELECT report_cards_id, submitted_by, athletes_id, levels_id, comment, comment_modifications, updated_date, status, report_cards_mod.id AS report_cards_mod_id
+        'SELECT report_cards_id, submitted_by, athletes_id, levels_id, comment, comment_modifications, updated_date, status, session, day_of_week, report_cards_mod.id AS report_cards_mod_id
         FROM report_cards 
         LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
         WHERE submitted_by = :coach_id AND comment_modifications IS NOT null AND status != "Partial"

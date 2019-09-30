@@ -33,6 +33,32 @@ function getCoachComments($pdo, $error, $athleteId) {
         http_response_code(HTTP_CODE_NOT_FOUND);
         $error->echoError('No coaches comments found when attempting to generate printable report card... getCoachComments()');
     } else {
+        for($i=0; $i < count($comments); $i++) {
+            $stmtComments = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
+            $stmtComments->execute(['comment' => $comments[$i]['comment']]);
+            $card_comments = $stmtComments->fetch();
+
+            $stmtIntro = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
+            $stmtIntro->execute(['id' => $card_comments['intro_comment_id']]);
+            $introComment = $stmtIntro->fetch()['comment'];
+
+            $stmtSkill = $pdo->prepare('SELECT comment, events.name AS event_name, skills.name AS skill_name FROM comments INNER JOIN events ON events.id = :event_id INNER JOIN skills ON skills.id = :skill_id WHERE comments.id = :id');
+            $stmtSkill->execute(['id' => $card_comments['skill_comment_id'], 'event_id' => $card_comments['event_id'], 'skill_id' => $card_comments['skill_id']]);
+            $skillObj = $stmtSkill->fetch();
+
+            $skillComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $skillObj['comment']));
+            
+            $stmtOutro = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
+            $stmtOutro->execute(['id' => $card_comments['closing_comment_id']]);
+            $outroComment = $stmtOutro->fetch()['comment'];
+
+            $comments[$i]['comment'] = str_replace("~!NAME!~", $comments[$i]['first_name'], $introComment);
+            $comments[$i]['comment'] .= ' ';
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $skillComment);
+            $comments[$i]['comment'] .= ' ';
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $outroComment);
+        }
+
         if(count($comments) < $numberOfComments) {
             $empty = [];
             $empty['level_name'] = 'empty';
