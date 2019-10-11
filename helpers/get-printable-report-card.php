@@ -203,8 +203,22 @@ function getRecentLevel($pdo, $error, $athleteId) {
                     if($allLevels[$i]['level_number'] === $levelName['level_number']) {
                         //this is the ideal senario
                         if($i >= $PREVIOUS_LEVELS && count($allLevels) - ($i+1) >= $FUTURE_LEVELS) {
-                            for($x = $i-$PREVIOUS_LEVELS; $x < $FULL + ($i-$PREVIOUS_LEVELS); $x++) {
-                                array_push($levelNames, $allLevels[$x]);
+                            $finalIndex = $FULL + ($i-$PREVIOUS_LEVELS);
+                            for($x = $i-$PREVIOUS_LEVELS; $x < $finalIndex; $x++) {
+                                //select a completed report card for the level about to be displayed
+                                $stmt3 = $pdo->prepare("SELECT * FROM `report_cards` WHERE `status` != 'Partial' AND `levels_id` = :level_id AND `athletes_id` = :athlete_id");
+                                $stmt3->execute(['level_id' => $allLevels[$x]['id'], 'athlete_id' => $athleteId]);
+                                $levelComplete = $stmt3->fetchAll();
+                                //if the level is completed and its less than the last created report card then display the level
+                                if ((count($levelComplete) > 0 && $x < $i) || $x >= $i) {
+                                    array_push($levelNames, $allLevels[$x]);
+                                //if there level isnt completed and there is room to shift everything over then do that
+                                } else if ($x < $i && $finalIndex + 1 < count($allLevels)) {
+                                    $finalIndex ++;
+                                //if there isnt room for the shift then it needs to be displayed
+                                } else {
+                                    array_push($levelNames, $allLevels[$x]);
+                                }
                             }
                             return $levelNames;
                         }
