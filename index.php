@@ -167,6 +167,31 @@ switch($selector) {
         getReportCards($pdo, $error, 'submitted_by = :coach_id AND status = :partial', ['coach_id' => $url[1], 'partial' => 'Partial'], 'updated_date DESC', true);
         break;
 
+        case 'add-or-update-report-cards-components':
+        if(empty($_POST)) {
+            $_POST = json_decode(file_get_contents('php://input'), true);
+        }
+
+        $noRank = [];
+        $noRank['report_cards_id'] = $_POST['report_cards_id'];
+        $noRank['skills_id'] = $_POST['skills_id'];
+        $stmt = $pdo->prepare("SELECT * FROM report_cards_components WHERE report_cards_id = :report_cards_id AND skills_id = :skills_id");
+        $stmt->execute($noRank);
+
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            $stmt1 = $pdo->prepare("INSERT INTO report_cards_components (report_cards_id, skills_id, rank) VALUES (:report_cards_id, :skills_id, :rank)");
+            $stmt1->execute($_POST);
+            $results1 = $stmt1->fetchAll();
+        } else {
+            $stmt2 = $pdo->prepare("UPDATE report_cards_components SET rank=:rank WHERE report_cards_id=:report_cards_id AND skills_id=:skills_id");
+            $stmt2->execute($_POST);
+            $results2 = $stmt2->fetchAll();
+        }
+
+        http_response_code(HTTP_CODE_OK);
+        break;
+
         case 'delete-report-card-components':
         $stmt = $pdo->prepare("DELETE FROM report_cards_components WHERE report_cards_id = :report_cards_id");
         $stmt->execute(['report_cards_id' => $item]);
