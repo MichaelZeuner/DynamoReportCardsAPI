@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.3
+-- version 4.8.4
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Aug 26, 2019 at 12:58 PM
--- Server version: 5.6.41-84.1
--- PHP Version: 7.2.7
+-- Host: 127.0.0.1
+-- Generation Time: Oct 11, 2019 at 06:21 PM
+-- Server version: 10.1.37-MariaDB
+-- PHP Version: 7.3.0
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `dynamoca_report_cards`
+-- Database: `report_cards`
 --
 
 -- --------------------------------------------------------
@@ -60,7 +60,7 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (17, 1, 9, 'Stop Bounce Motorcycle', 1),
 (18, 1, 9, '5 Jumps in a row', 1),
 (19, 1, 9, 'Straight Body Fall to back into Pit', 1),
-(20, 1, 9, 'Consecutive Jumps down Tumble Trak', 1),
+(20, 1, 9, 'Consecutive Jumps down Tumble Track', 1),
 (21, 2, 5, 'Chasse', 1),
 (22, 2, 5, 'Squat on (Knee Height)', 1),
 (23, 2, 5, 'Straddle on (Knee Height)', 1),
@@ -98,8 +98,8 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (55, 3, 8, 'Front Roll to Stand (down incline)', 1),
 (56, 3, 8, 'Donkey Kick (Handstand prep)', 1),
 (57, 3, 9, '10 Straight Jumps to Stop Bounce', 1),
-(58, 3, 9, '1, 2, 3, ½ turn on Tumble Trak', 1),
-(59, 3, 9, 'Bouncing Hands & Knees (Tumble Trak)', 1),
+(58, 3, 9, '1, 2, 3, ½ turn on Tumble Track', 1),
+(59, 3, 9, 'Bouncing Hands & Knees (Tumble Track)', 1),
 (60, 3, 9, 'Seat Drop to Stand', 1),
 (61, 4, 5, 'Hurdle to 2 Feet', 1),
 (62, 4, 5, 'Hands & Knees (onto Vault or 2 Blocks)', 1),
@@ -119,7 +119,7 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (76, 4, 8, 'Kick to Handstand (Back against Incline)', 1),
 (77, 4, 9, 'Jump Routine with 3 Shaped Jumps (Pencil, Tuck, Star)', 1),
 (78, 4, 9, 'Jump ½ Turn', 1),
-(79, 4, 9, 'Hand Knee Drop (length of Tumble Trak)', 1),
+(79, 4, 9, 'Hand Knee Drop (length of Tumble Track)', 1),
 (80, 4, 9, 'Seat Drop to Hand Knee Drop on 2\" Mat', 1),
 (81, 5, 5, 'Hurdle to 2 Feet with Arm Circle', 1),
 (82, 5, 5, 'Squat On (onto Vault or 2 Blocks)', 1),
@@ -176,7 +176,7 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (133, 7, 9, 'Stop Bounce (Motorcycle)', 1),
 (134, 7, 9, 'Straight body fall to back into pit', 1),
 (135, 7, 9, '5 Jumps in a row', 1),
-(136, 7, 9, 'Consecutive Jumps on Tumble Trak', 1),
+(136, 7, 9, 'Consecutive Jumps on Tumble Track', 1),
 (137, 8, 10, 'Jump over small objects', 1),
 (138, 8, 10, 'Squat on (knee height)', 1),
 (139, 8, 10, 'Straddle on (knee height)', 1),
@@ -209,8 +209,8 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (166, 9, 8, 'Front Roll to stand (down incline)', 1),
 (167, 9, 8, 'Donkey Kick (handstand prep)', 1),
 (168, 9, 9, '10 Straight Jumps to Stop Bounce', 1),
-(169, 9, 9, '1, 2, 3, ½ turn on Tumble Trak', 1),
-(170, 9, 9, 'Bouncing hands & knees on Tumble Trak', 1),
+(169, 9, 9, '1, 2, 3, ½ turn on Tumble Track', 1),
+(170, 9, 9, 'Bouncing hands & knees on Tumble Track', 1),
 (171, 9, 9, 'Seat Drop to stand', 1),
 (172, 10, 10, 'Hurdle to 2 feet with arm circle', 1),
 (173, 10, 10, 'Straight jump off beat board to safety mat', 1),
@@ -471,7 +471,7 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (430, 26, 9, 'Stop Bounce Motorcycle', 1),
 (431, 26, 9, '5 Jumps in a row', 1),
 (432, 26, 9, 'Straight Body Fall to Back into Pit', 1),
-(433, 26, 9, 'Consecutive Jumps down Tumble Trak', 1),
+(433, 26, 9, 'Consecutive Jumps down Tumble Track', 1),
 (434, 27, 5, 'Chasse', 1),
 (435, 27, 5, 'Squat on (Knee-Height)', 1),
 (436, 27, 5, 'Straddle on (Knee-Height)', 1),
@@ -509,8 +509,8 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (469, 28, 8, 'Front Roll to Stand (down incline)', 1),
 (470, 28, 8, 'Donkey Kick (Handstand prep)', 1),
 (471, 28, 9, '10 Straight Jumps to Stop Bounce', 1),
-(472, 28, 9, '1, 2, 3, ½ Turn on Tumble Trak', 1),
-(473, 28, 9, 'Bouncing Hands & Knees (Tumble Trak)', 1),
+(472, 28, 9, '1, 2, 3, ½ Turn on Tumble Track', 1),
+(473, 28, 9, 'Bouncing Hands & Knees (Tumble Track)', 1),
 (474, 28, 9, 'Seat Drop to Stand', 1),
 (475, 29, 5, 'Hurdle to 2 Feet', 1),
 (476, 29, 5, 'Hands & Knees onto Vault or 2 Blocks', 1),
@@ -530,7 +530,7 @@ INSERT INTO `skills` (`id`, `levels_id`, `events_id`, `name`, `active`) VALUES
 (490, 29, 8, 'Kick to Handstand (Back against incline)', 1),
 (491, 29, 9, 'Jump Routine with 3 Shaped Jumps (Pencil, Tuck, Star)', 1),
 (492, 29, 9, 'Jump ½ Turn', 1),
-(493, 29, 9, 'Hand Knee Drop (length of Tumble Trak)', 1),
+(493, 29, 9, 'Hand Knee Drop (length of Tumble Track)', 1),
 (494, 29, 9, 'Seat Drop to Hand Knee Drop on 2\" Mat', 1),
 (495, 30, 5, 'Hurdle to 2 Feet with Arm Circle', 1),
 (496, 30, 5, 'Squat On (onto Vault or 2 Blocks)', 1),
