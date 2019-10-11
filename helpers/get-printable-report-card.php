@@ -3,11 +3,25 @@
 function getPrintableReportCard($pdo, $error, $athleteId) {
     $printableReportCard = [];
     $printableReportCard['levels'] = getRecentLevel($pdo, $error, $athleteId);
+    $printableReportCard['max_level'] = getMaxLevel($pdo, $error, $printableReportCard['levels'][0]['name']);
     $printableReportCard['events'] = getEvents($pdo, $error, $printableReportCard['levels'], $athleteId);
     $printableReportCard['coachComments'] = getCoachComments($pdo, $error, $athleteId);
     $printableReportCard['athlete'] = getAthlete($pdo, $error, $athleteId);
 
     echo json_encode($printableReportCard);
+}
+
+function getMaxLevel($pdo, $error, $levelName) {
+    $stmt = $pdo->prepare("SELECT level_number FROM level_groups INNER JOIN levels ON level_groups.id = levels.level_groups_id WHERE name = :levelName ORDER BY level_number DESC LIMIT 1");
+    $stmt->execute(['levelName' => $levelName]);
+
+    $level = $stmt->fetch();
+    if(count($level) == 0) {
+        http_response_code(HTTP_CODE_NOT_FOUND);
+        $error->echoError('No level number found when attempting to generate printable report card... getMaxLevel()');
+    } else {
+        return $level['level_number'];
+    }
 }
 
 function getAthlete($pdo, $error, $athleteId) {
