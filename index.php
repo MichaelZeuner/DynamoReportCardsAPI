@@ -167,6 +167,25 @@ switch($selector) {
         getReportCards($pdo, $error, 'submitted_by = :coach_id AND status = :partial', ['coach_id' => $url[1], 'partial' => 'Partial'], 'updated_date DESC', true);
         break;
 
+        case 'add-athlete-if-new':
+        if(empty($_POST)) {
+            $_POST = json_decode(file_get_contents('php://input'), true);
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM athletes WHERE first_name LIKE :first_name AND last_name LIKE :last_name AND date_of_birth LIKE :date_of_birth");
+        $stmt->execute($_POST);
+
+        
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            $stmt1 = $pdo->prepare("INSERT INTO athletes (first_name, last_name, date_of_birth) VALUES (:first_name, :last_name, :date_of_birth)");
+            $stmt1->execute($_POST);
+            $results1 = $stmt1->fetchAll();
+        }
+
+        http_response_code(HTTP_CODE_OK);
+        break;
+
         case 'add-or-update-report-cards-components':
         if(empty($_POST)) {
             $_POST = json_decode(file_get_contents('php://input'), true);
