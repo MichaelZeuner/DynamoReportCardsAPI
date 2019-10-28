@@ -126,7 +126,7 @@ function getEventsSkills($pdo, $error, $levels, $events, $athleteId) {
 
             if(count($allSkills) == 0) {
                 http_response_code(HTTP_CODE_NOT_FOUND);
-                $error->echoError('No recent level found when attempting to generate printable report card... getRecentLevel()');
+                $error->echoError('No skills found for level id: '.$levels[$x]['id'].' event id: '.$events[$i]['id'].'  ... getEventsSkills()');
                 return;
             } else {
                 if(count($allSkills) > $maxSkills) { $maxSkills = count($allSkills); }
