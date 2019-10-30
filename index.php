@@ -345,6 +345,33 @@ switch($selector) {
             echo json_encode(addComments($pdo, $error, $accessLevel));
         break;
 
+        case 'recent-similar-report-cards':
+        $stmt = $pdo->prepare("SELECT status, updated_date FROM report_cards WHERE athletes_id = :athletes_id AND levels_id = :levels_id");
+        $stmt->execute(['athletes_id' => $url[1], 'levels_id' => $url[2]]);
+    
+        $results = $stmt->fetchAll();
+        $ret = [];
+        $ret['recentlyDone'] = false;
+        $ret['type'] = 'NA';
+        if(count($results) > 0) {
+            $currentDate = date_create();
+            for($i=0; $i<count($results); $i++) {
+                $updatedDate = date_create($results[$i]['updated_date']);
+                $daysDifferent = date_diff($updatedDate, $currentDate)->format("%a");
+                if($results[$i]['status'] === 'Partial') {
+                    $ret['recentlyDone'] = true;
+                    $ret['type'] = 'Partial';
+                    break;
+                } else if($daysDifferent < 50) {
+                    $ret['recentlyDone'] = true;
+                    $ret['type'] = $daysDifferent;
+                }
+            }
+        }
+        http_response_code(HTTP_CODE_OK);
+        echo json_encode($ret);
+        break;
+
         default:
         http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
