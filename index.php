@@ -330,7 +330,7 @@ switch($selector) {
         break;
 
         case 'printable-report-card':
-        getPrintableReportCard($pdo, $error, $url[1]);
+        getPrintableReportCard($pdo, $error, $url[1], $url[2]);
         break;
 
         case 'get-comments':

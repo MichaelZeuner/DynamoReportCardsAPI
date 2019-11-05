@@ -1,11 +1,11 @@
 <?php
 
-function getPrintableReportCard($pdo, $error, $athleteId) {
+function getPrintableReportCard($pdo, $error, $athleteId, $levelGroupId) {
     $printableReportCard = [];
-    $printableReportCard['levels'] = getRecentLevel($pdo, $error, $athleteId);
+    $printableReportCard['levels'] = getRecentLevel($pdo, $error, $athleteId, $levelGroupId);
     $printableReportCard['max_level'] = getMaxLevel($pdo, $error, $printableReportCard['levels'][0]['name']);
     $printableReportCard['events'] = getEvents($pdo, $error, $printableReportCard['levels'], $athleteId);
-    $printableReportCard['coachComments'] = getCoachComments($pdo, $error, $athleteId);
+    $printableReportCard['coachComments'] = getCoachComments($pdo, $error, $athleteId, $levelGroupId);
     $printableReportCard['athlete'] = getAthlete($pdo, $error, $athleteId);
 
     echo json_encode($printableReportCard);
@@ -37,10 +37,10 @@ function getAthlete($pdo, $error, $athleteId) {
     }
 }
 
-function getCoachComments($pdo, $error, $athleteId) {
+function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
     $numberOfComments = 5;
-    $stmt = $pdo->prepare("SELECT name AS level_name, level_number, session, first_name, last_name, comment, status, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id AND approved IS NOT null ORDER BY updated_date DESC LIMIT $numberOfComments");
-    $stmt->execute(['athletes_id' => $athleteId]);
+    $stmt = $pdo->prepare("SELECT name AS level_name, level_number, session, first_name, last_name, comment, status, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id AND level_groups.id = :levelGroupId AND approved IS NOT null ORDER BY updated_date DESC LIMIT $numberOfComments");
+    $stmt->execute(['athletes_id' => $athleteId, 'levelGroupId' => $levelGroupId]);
 
     $comments = $stmt->fetchAll();
     if(count($comments) == 0) {
@@ -173,9 +173,9 @@ function getAthletesRankForSkill($pdo, $error, $skillId, $athleteId) {
     return $rank;
 }
 
-function getRecentLevel($pdo, $error, $athleteId) {
-    $stmt = $pdo->prepare("SELECT levels.id, name, level_number FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT 1");
-    $stmt->execute(['athletes_id' => $athleteId]);
+function getRecentLevel($pdo, $error, $athleteId, $levelGroupId) {
+    $stmt = $pdo->prepare("SELECT levels.id, name, level_number FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE athletes_id = :athletes_id AND level_groups.id = :levelGroupId ORDER BY created_date DESC LIMIT 1");
+    $stmt->execute(['athletes_id' => $athleteId, 'levelGroupId' => $levelGroupId]);
 
     $levelName = $stmt->fetch();
     if(count($levelName) == 0) {
