@@ -61,6 +61,9 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
                 $loggedInUser = $user;
             }
         }
+    } else {
+        $error->echoError('Does this happen?');
+        die();  
     }
 } else if(isLocal()) {
     $error->echoError('Probably no access -- silly silly -- required only for local. Something causes multiple call with CORS on local');
@@ -89,7 +92,7 @@ switch($selector) {
     case 'login':
     if(empty($loggedInUser)) {
         http_response_code(HTTP_CODE_NOT_AUTHORIZED);
-        $error->echoError('Incorrect username or password');
+        $error->echoError('Incorrect email or password');
     } else {
         http_response_code(HTTP_CODE_OK);
         echo json_encode($loggedInUser);
@@ -286,7 +289,6 @@ switch($selector) {
         case 'update-user-no-password':
 
         $stmt = $pdo->prepare('UPDATE users SET 
-            username = :username, 
             email = :email,
             first_name = :first_name, 
             last_name = :last_name, 
@@ -297,7 +299,6 @@ switch($selector) {
             
         $putData = json_decode(file_get_contents("php://input"), true);
         $stmt->execute([
-            'username' => $putData['username'], 
             'email' => $putData['email'], 
             'first_name' => $putData['first_name'], 
             'last_name' => $putData['last_name'], 

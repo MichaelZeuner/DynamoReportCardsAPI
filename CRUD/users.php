@@ -19,7 +19,6 @@ class Users extends CRUD
 
     protected function getRequiredCreateData() {
         return [
-            'username', 
             'password_hash', 
             'email',
             'first_name',
@@ -30,14 +29,14 @@ class Users extends CRUD
     
     protected function getCreateSQL() {
         return 'INSERT INTO '.$this->getTableName().
-                ' (username, password_hash, email, 
+                ' (password_hash, email, 
                     first_name, last_name, access, active) VALUES'.
-                ' (:username, :password_hash, :email, 
+                ' (:password_hash, :email, 
                     :first_name, :last_name, :access, 1)';
     }
 
     protected function getReadAccess() {
-        return $this->getCreateAccess();
+        return [ADMIN, COACH, SUPERVISOR, NONE];
     }
 
     protected function getReadSQL() {
@@ -54,7 +53,6 @@ class Users extends CRUD
     }
     
     protected function dataManipulationUpdate($data) {
-        $newData['username'] = $data['username'];
         $newData['password_hash'] = password_hash($data['password'], PASSWORD_BCRYPT);
         $newData['email'] = $data['email'];
         $newData['first_name'] = $data['first_name'];
@@ -65,7 +63,6 @@ class Users extends CRUD
 
     protected function getUpdateSQL() {
         return 'UPDATE '.$this->getTableName().' SET 
-                    username = :username, 
                     password_hash = :password_hash, 
                     email = :email,
                     first_name = :first_name, 
