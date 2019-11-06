@@ -46,13 +46,13 @@ $accessLevel = 'NONE';
 $loggedInUser = null;
 
 if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
-    $username = $_SERVER['PHP_AUTH_USER'];
+    $email = $_SERVER['PHP_AUTH_USER'];
     $password = $_SERVER['PHP_AUTH_PW'];
 
-    if (isset($username) && isset($password)) {
+    if (isset($email) && isset($password)) {
         
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username AND active = 1 LIMIT 1");
-        $stmt->execute([ "username" => $username ]);
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND active = 1 LIMIT 1");
+        $stmt->execute([ "email" => $email ]);
         $user = $stmt->fetch();
         if(isset($user) && isset($user['password_hash'])) {
             if (password_verify($password, $user['password_hash'])) {
