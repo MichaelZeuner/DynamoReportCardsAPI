@@ -39,7 +39,16 @@ function getAthlete($pdo, $error, $athleteId) {
 
 function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
     $numberOfComments = 5;
-    $stmt = $pdo->prepare("SELECT name AS level_name, level_number, session, first_name, last_name, comment, status, updated_date FROM report_cards INNER JOIN levels ON report_cards.levels_id = levels.id INNER JOIN level_groups ON levels.level_groups_id = level_groups.id INNER JOIN users ON report_cards.submitted_by = users.id WHERE athletes_id = :athletes_id AND level_groups.id = :levelGroupId AND approved IS NOT null ORDER BY updated_date DESC LIMIT $numberOfComments");
+    $stmt = $pdo->prepare("SELECT 
+        name AS level_name, level_number, session, comment, status, updated_date,
+        fusers.first_name, fusers.last_name, susers.first_name as s_first_name, susers.last_name as s_last_name
+        FROM report_cards 
+        INNER JOIN levels ON report_cards.levels_id = levels.id 
+        INNER JOIN level_groups ON levels.level_groups_id = level_groups.id 
+        INNER JOIN users as fusers ON report_cards.submitted_by = fusers.id 
+        LEFT JOIN users as susers ON report_cards.secondary_coach_id = susers.id 
+        WHERE athletes_id = :athletes_id AND level_groups.id = :levelGroupId AND approved IS NOT null 
+        ORDER BY updated_date DESC LIMIT $numberOfComments");
     $stmt->execute(['athletes_id' => $athleteId, 'levelGroupId' => $levelGroupId]);
 
     $comments = $stmt->fetchAll();

@@ -2,7 +2,7 @@
 
 function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC', $returnArrayOnEmpty = false) {
     $stmt = $pdo->prepare(
-        "SELECT report_cards.id, submitted_by, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, session,
+        "SELECT report_cards.id, submitted_by, secondary_coach_id, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, session,
                 day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
         FROM report_cards 
         INNER JOIN users suser ON suser.id = submitted_by 
@@ -28,6 +28,10 @@ function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_dat
             $stmtAthlete = $pdo->prepare('SELECT * FROM athletes WHERE id = :athlete_id');
             $stmtAthlete->execute(['athlete_id' => $report_card['athletes_id']]);
             $report_card['athlete'] = $stmtAthlete->fetch();
+
+            $stmtSecondaryCoach = $pdo->prepare('SELECT * FROM users WHERE id = :secondary_coach_id'); 
+            $stmtSecondaryCoach->execute(['secondary_coach_id' => $report_card['secondary_coach_id']]);
+            $report_card['secondary_coach'] = $stmtSecondaryCoach->fetch();
 
             $stmtLevel = $pdo->prepare('SELECT levels.id, name, level_groups.id AS level_groups_id, level_number FROM levels INNER JOIN level_groups ON level_groups.id = levels.level_groups_id WHERE levels.id = :levels_id');
             $stmtLevel->execute(['levels_id' => $report_card['levels_id']]);
