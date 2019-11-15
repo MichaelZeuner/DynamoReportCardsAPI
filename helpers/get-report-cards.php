@@ -37,7 +37,7 @@ function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_dat
             $stmtLevel->execute(['levels_id' => $report_card['levels_id']]);
             $report_card['level'] = $stmtLevel->fetch();
 
-            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
+            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, personality_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
             $stmtLevel->execute(['comment' => $report_card['comment']]);
             $report_card['card_comments'] = $stmtLevel->fetch();
 

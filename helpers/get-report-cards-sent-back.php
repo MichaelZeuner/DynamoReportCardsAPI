@@ -2,7 +2,7 @@
 
 function getReportCardsSentBack($pdo, $error, $coach_id) {
     $stmt = $pdo->prepare(
-        'SELECT report_cards_id, submitted_by, athletes_id, levels_id, comment, comment_modifications, updated_date, status, session, day_of_week, report_cards_mod.id AS report_cards_mod_id
+        'SELECT report_cards_id, submitted_by, secondary_coach_id, athletes_id, levels_id, comment, comment_modifications, updated_date, status, session, day_of_week, report_cards_mod.id AS report_cards_mod_id
         FROM report_cards 
         LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
         WHERE submitted_by = :coach_id AND comment_modifications IS NOT null AND status != "Partial"
@@ -25,11 +25,11 @@ function getReportCardsSentBack($pdo, $error, $coach_id) {
             $stmtLevel->execute(['levels_id' => $report_card['levels_id']]);
             $report_card['level'] = $stmtLevel->fetch();
 
-            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
+            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, personality_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
             $stmtLevel->execute(['comment' => $report_card['comment']]);
             $report_card['card_comments'] = $stmtLevel->fetch();
 
-            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment_modifications');
+            $stmtLevel = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, personality_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment_modifications');
             $stmtLevel->execute(['comment_modifications' => $report_card['comment_modifications']]);
             $report_card['card_mod_comments'] = $stmtLevel->fetch();
 

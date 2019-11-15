@@ -57,7 +57,7 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
         $error->echoError('No coaches comments found when attempting to generate printable report card... getCoachComments()');
     } else {
         for($i=0; $i < count($comments); $i++) {
-            $stmtComments = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
+            $stmtComments = $pdo->prepare('SELECT intro_comment_id, skill_comment_id, personality_comment_id, closing_comment_id, event_id, skill_id FROM report_cards_comments WHERE id = :comment');
             $stmtComments->execute(['comment' => $comments[$i]['comment']]);
             $card_comments = $stmtComments->fetch();
 
@@ -71,6 +71,10 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
 
             $skillComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $skillObj['comment']));
             
+            $stmtPersonality = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
+            $stmtPersonality->execute(['id' => $card_comments['personality_comment_id']]);
+            $personalityComment = $stmtPersonality->fetch()['comment'];
+
             $stmtOutro = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtOutro->execute(['id' => $card_comments['closing_comment_id']]);
             $outroComment = $stmtOutro->fetch()['comment'];
@@ -78,6 +82,8 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
             $comments[$i]['comment'] = str_replace("~!NAME!~", $comments[$i]['first_name'], $introComment);
             $comments[$i]['comment'] .= ' ';
             $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $skillComment);
+            $comments[$i]['comment'] .= ' ';
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $personalityComment);
             $comments[$i]['comment'] .= ' ';
             $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $outroComment);
         }
