@@ -222,7 +222,7 @@ switch($selector) {
         break;
 
         case 'read-levels':
-        $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1");
+        $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number, advanced FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1");
         $stmt->execute();
 
         $results = $stmt->fetchAll();
