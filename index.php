@@ -373,6 +373,36 @@ switch($selector) {
         echo json_encode($ret);
         break;
 
+        case 'get-athlete-previous-level':
+            $stmt = $pdo->prepare("SELECT name, level_number, levels.id, status FROM report_cards 
+                INNER JOIN levels ON levels.id = report_cards.levels_id 
+                INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
+                WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT 1");
+
+            $stmt->execute(['athletes_id' => $url[1]]);
+        
+            $results = $stmt->fetchAll();
+            $data = $results[0];
+            if(count($results) == 0) {
+                http_response_code(HTTP_CODE_NOT_FOUND);
+                $error->echoError('No data found');
+            } else {
+                http_response_code(HTTP_CODE_OK);
+
+                $stmt = $pdo->prepare("SELECT level_number, levels.id FROM levels  
+                    INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
+                    WHERE name = :name AND level_number = :next_level_number LIMIT 1");
+                    
+                $stmt->execute(['name' => $data['name'], 'next_level_number' => ($data['level_number'] + 1)]);
+
+                $results = $stmt->fetchAll();
+                $data['next_level_number'] = $results[0]['level_number'];
+                $data['next_level_id'] = $results[0]['id'];
+
+                echo json_encode($data);
+            }
+        break;
+
         default:
         http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
