@@ -403,6 +403,62 @@ switch($selector) {
             }
         break;
 
+        case 'get-testing-sheet-data':
+            //url[1] should be a json string. where its an array [{athlete_id, current_level}]
+            $passedData = json_decode($url[1]);
+            $results = [];
+
+
+//THIS LOOKS ALL PROMISING FOR THE PASSED LEVEL. nOW DO IT FOR +/- 1
+
+            for($i=0; $i<sizeof($passedData);$i++) {
+                $athleteData = $passedData[$i];
+                
+                $stmt = $pdo->prepare("SELECT name, level_number, levels.id, report_cards.id AS report_cards_id FROM levels 
+                    INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
+                    LEFT JOIN report_cards ON levels.id = report_cards.levels_id
+                    WHERE levels.id = :levels_id AND levels.active = 1 AND (athletes_id = :athlete_id OR athletes_id IS NULL)");
+
+                $stmt->execute(['levels_id' => $athleteData->current_level, "athlete_id" => $athleteData->athlete_id]);
+            
+                $results[$i] = $stmt->fetchAll()[0];
+
+                $stmt = $pdo->prepare("SELECT name, skills.id, events_id, rank FROM skills 
+                    LEFT JOIN report_cards_components ON report_cards_components.skills_id = skills.id
+                    WHERE levels_id = :levels_id AND active = 1 AND (report_cards_id = :report_cards_id OR report_cards_id IS NULL) 
+                    ORDER BY events_id ASC");
+                $stmt->execute(['levels_id' => $athleteData->current_level, 'report_cards_id' => $results[$i]['report_cards_id']]);
+                $components = $stmt->fetchAll();
+
+                $events = [];
+                for($j=0;$j<count($components);$j++) {
+
+                    $insertRequired = true;
+                    for($k=0;$k<count($events);$k++) {
+                        if($events[$k]['id'] === $components[$j]['events_id']) {
+                            array_push($events[$k]['components'], $components[$j]);
+                            $insertRequired = false;
+                            break;
+                        }
+                    }
+
+                    if($insertRequired) {
+                        $stmt = $pdo->prepare("SELECT name, id FROM events WHERE id = :events_id AND active = 1");
+                        $stmt->execute(['events_id' => $components[$j]['events_id']]);
+                        $event = $stmt->fetchAll()[0];
+                        $event['components'] = [];
+                        array_push($event['components'], $components[$j]);
+
+                        array_push($events, $event);
+                    }
+                }
+
+                $results[$i]['events'] = $events;
+            }
+
+            echo json_encode($results);
+        break;
+
         default:
         http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
