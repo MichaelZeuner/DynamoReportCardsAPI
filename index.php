@@ -12,6 +12,7 @@ require_once(ROOT . '/helpers/errors.php');
 require_once(ROOT . '/helpers/get-report-cards.php');
 require_once(ROOT . '/helpers/get-report-cards-sent-back.php');
 require_once(ROOT . '/helpers/get-printable-report-card.php');
+require_once(ROOT . '/helpers/get-testing-sheet-data.php');
 require_once(ROOT . '/CRUD/CRUD.php');
 require_once(ROOT . '/CRUD/commentsCRUD.php');
 
@@ -374,30 +375,41 @@ switch($selector) {
         break;
 
         case 'get-athlete-previous-level':
-            $stmt = $pdo->prepare("SELECT name, level_number, levels.id, status FROM report_cards 
+            $stmt = $pdo->prepare("SELECT name, level_number, levels.id, status, levels.level_groups_id 
+                FROM report_cards 
                 INNER JOIN levels ON levels.id = report_cards.levels_id 
                 INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
-                WHERE athletes_id = :athletes_id ORDER BY created_date DESC LIMIT 1");
+                WHERE athletes_id = :athletes_id ORDER BY levels.level_groups_id DESC, created_date DESC");
 
             $stmt->execute(['athletes_id' => $url[1]]);
         
             $results = $stmt->fetchAll();
-            $data = $results[0];
             if(count($results) == 0) {
                 http_response_code(HTTP_CODE_NOT_FOUND);
                 $error->echoError('No data found');
             } else {
                 http_response_code(HTTP_CODE_OK);
 
-                $stmt = $pdo->prepare("SELECT level_number, levels.id FROM levels  
-                    INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
-                    WHERE name = :name AND level_number = :next_level_number LIMIT 1");
-                    
-                $stmt->execute(['name' => $data['name'], 'next_level_number' => ($data['level_number'] + 1)]);
+                $j=0;
+                for($i=0;$i<count($results);$i++) {
+                    if($j==0 || $results[$i]['level_groups_id'] != $data[$j-1]['level_groups_id']) {
+                        $data[$j] = $results[$i];
 
-                $results = $stmt->fetchAll();
-                $data['next_level_number'] = $results[0]['level_number'];
-                $data['next_level_id'] = $results[0]['id'];
+                        $stmt = $pdo->prepare("SELECT level_number, levels.id FROM levels  
+                            INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
+                            WHERE name = :name AND level_number = :next_level_number LIMIT 1");
+                            
+                        $stmt->execute(['name' => $data[$j]['name'], 'next_level_number' => ($data[$j]['level_number'] + 1)]);
+
+                        $additionalData = $stmt->fetchAll();
+                        $data[$j]['next_level_number'] = $additionalData[0]['level_number'];
+                        $data[$j]['next_level_id'] = $additionalData[0]['id'];
+                        $j++;
+                    }
+                    
+                }
+
+                
 
                 echo json_encode($data);
             }
@@ -405,58 +417,7 @@ switch($selector) {
 
         case 'get-testing-sheet-data':
             //url[1] should be a json string. where its an array [{athlete_id, current_level}]
-            $passedData = json_decode($url[1]);
-            $results = [];
-
-
-//THIS LOOKS ALL PROMISING FOR THE PASSED LEVEL. nOW DO IT FOR +/- 1
-
-            for($i=0; $i<sizeof($passedData);$i++) {
-                $athleteData = $passedData[$i];
-                
-                $stmt = $pdo->prepare("SELECT name, level_number, levels.id, report_cards.id AS report_cards_id FROM levels 
-                    INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
-                    LEFT JOIN report_cards ON levels.id = report_cards.levels_id
-                    WHERE levels.id = :levels_id AND levels.active = 1 AND (athletes_id = :athlete_id OR athletes_id IS NULL)");
-
-                $stmt->execute(['levels_id' => $athleteData->current_level, "athlete_id" => $athleteData->athlete_id]);
-            
-                $results[$i] = $stmt->fetchAll()[0];
-
-                $stmt = $pdo->prepare("SELECT name, skills.id, events_id, rank FROM skills 
-                    LEFT JOIN report_cards_components ON report_cards_components.skills_id = skills.id
-                    WHERE levels_id = :levels_id AND active = 1 AND (report_cards_id = :report_cards_id OR report_cards_id IS NULL) 
-                    ORDER BY events_id ASC");
-                $stmt->execute(['levels_id' => $athleteData->current_level, 'report_cards_id' => $results[$i]['report_cards_id']]);
-                $components = $stmt->fetchAll();
-
-                $events = [];
-                for($j=0;$j<count($components);$j++) {
-
-                    $insertRequired = true;
-                    for($k=0;$k<count($events);$k++) {
-                        if($events[$k]['id'] === $components[$j]['events_id']) {
-                            array_push($events[$k]['components'], $components[$j]);
-                            $insertRequired = false;
-                            break;
-                        }
-                    }
-
-                    if($insertRequired) {
-                        $stmt = $pdo->prepare("SELECT name, id FROM events WHERE id = :events_id AND active = 1");
-                        $stmt->execute(['events_id' => $components[$j]['events_id']]);
-                        $event = $stmt->fetchAll()[0];
-                        $event['components'] = [];
-                        array_push($event['components'], $components[$j]);
-
-                        array_push($events, $event);
-                    }
-                }
-
-                $results[$i]['events'] = $events;
-            }
-
-            echo json_encode($results);
+            echo json_encode(getTestingSheetData($pdo, $error, json_decode($url[1])));
         break;
 
         default:
