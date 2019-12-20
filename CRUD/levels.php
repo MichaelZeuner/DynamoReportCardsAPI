@@ -10,16 +10,16 @@ class Levels extends CRUD
     }
 
     protected function getRequiredCreateData() {
-        return ['level_groups_id', 'level_number', 'advanced'];
+        return ['level_groups_id', 'level_number'];
     }
     
     protected function getCreateSQL() {
-        return 'INSERT INTO '.$this->getTableName().' (level_groups_id, level_number, advanced, active) VALUES (:level_groups_id, :level_number, :advanced, 1)';
+        return 'INSERT INTO '.$this->getTableName().' (level_groups_id, level_number, active) VALUES (:level_groups_id, :level_number, 1)';
     }
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT $table.id, $table.level_groups_id, $table.level_number. $table.advanced FROM $table WHERE active = 1";
+        return "SELECT $table.id, $table.level_groups_id, $table.level_number FROM $table WHERE active = 1";
     }
 
     protected function getUpdateAccess() {
@@ -33,12 +33,11 @@ class Levels extends CRUD
     protected function dataManipulationUpdate($data) {
         $newData['level_groups_id'] = $data['level_groups_id'];
         $newData['level_number'] = $data['level_number'];
-        $newData['advanced'] = $data['advanced'];
         return $newData; 
     }
 
     protected function getUpdateSQL() {
-        return 'UPDATE '.$this->getTableName().' SET level_number = :level_number, level_groups_id = :level_groups_id, advanced = :advanced WHERE id = :id';
+        return 'UPDATE '.$this->getTableName().' SET level_number = :level_number, level_groups_id = :level_groups_id WHERE id = :id';
     }
 
     protected function getDeleteAccess() {

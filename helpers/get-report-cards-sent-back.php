@@ -21,7 +21,7 @@ function getReportCardsSentBack($pdo, $error, $coach_id) {
             $stmtAthlete->execute(['athlete_id' => $report_card['athletes_id']]);
             $report_card['athlete'] = $stmtAthlete->fetch();
 
-            $stmtLevel = $pdo->prepare('SELECT levels.id, name, level_groups.id AS level_groups_id, level_number, advanced FROM levels INNER JOIN level_groups ON level_groups.id = levels.level_groups_id WHERE levels.id = :levels_id');
+            $stmtLevel = $pdo->prepare('SELECT levels.id, name, level_groups.id AS level_groups_id, level_number FROM levels INNER JOIN level_groups ON level_groups.id = levels.level_groups_id WHERE levels.id = :levels_id');
             $stmtLevel->execute(['levels_id' => $report_card['levels_id']]);
             $report_card['level'] = $stmtLevel->fetch();
 
