@@ -70,7 +70,8 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
             $skillObj = $stmtSkill->fetch();
 
             $skillComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $skillObj['comment']));
-            
+            $skillCommentClean = strtolower(preg_replace('/\(.*\)/g', "", $skillComment));
+
             $stmtPersonality = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtPersonality->execute(['id' => $card_comments['personality_comment_id']]);
             $personalityComment = $stmtPersonality->fetch()['comment'];
@@ -81,7 +82,7 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
 
             $comments[$i]['comment'] = str_replace("~!NAME!~", $comments[$i]['first_name'], $introComment);
             $comments[$i]['comment'] .= ' ';
-            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $skillComment);
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $skillCommentClean);
             $comments[$i]['comment'] .= ' ';
             $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $personalityComment);
             $comments[$i]['comment'] .= ' ';
