@@ -70,7 +70,7 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
             $skillObj = $stmtSkill->fetch();
 
             $skillComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $skillObj['comment']));
-            $skillCommentClean = strtolower(preg_replace('/(.*)/', "", $skillComment));
+            $skillCommentClean = strtolower(preg_replace('/\(.*\)/', "", $skillComment));
 
             $stmtPersonality = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtPersonality->execute(['id' => $card_comments['personality_comment_id']]);
