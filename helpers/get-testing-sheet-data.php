@@ -2,14 +2,22 @@
 
 function getTestingSheetData($pdo, $error, $passedData) {
     $results = [];
-
-
-//THIS LOOKS ALL PROMISING FOR THE PASSED LEVEL. nOW DO IT FOR +/- 1
+    $page = 0;
+    $newPage = true;
+    for($i=0; $i<ceil(sizeof($passedData)/2);$i++) {
+        $results[$i] = [];
+    }
 
     for($i=0; $i<sizeof($passedData);$i++) {
         $athleteData = $passedData[$i];
         
-        $results[$i]['athlete'] = getAthleteInfo($pdo, $athleteData->athlete_id);
+        if($newPage) {
+            $results[$page]['athlete'] = [];
+            $results[$page]['levels'] = [];
+            $results[$page]['events'] = [];
+        }
+
+        array_push($results[$page]['athlete'], getAthleteInfo($pdo, $athleteData->athlete_id));
 
         $levelInfo = getLevelInfo($pdo, $athleteData->current_level);
 
@@ -18,23 +26,31 @@ function getTestingSheetData($pdo, $error, $passedData) {
         $levelPlus1 = getLevelExistsAndData($pdo, $levelInfo['level_groups_id'], $levelInfo['level_number']+1);
         $levelPlus2 = getLevelExistsAndData($pdo, $levelInfo['level_groups_id'], $levelInfo['level_number']+2);
 
-        $results[$i]['levels'] = [];
+        $currentLevel = [];
         if($levelMinus1 != false && $levelPlus1 != false) {
-            $results[$i]['levels'][0] = getDataForLevel($pdo, $levelMinus1['id'], $athleteData->athlete_id);
-            $results[$i]['levels'][1] = getDataForLevel($pdo, $athleteData->current_level, $athleteData->athlete_id);
-            $results[$i]['levels'][2] = getDataForLevel($pdo, $levelPlus1['id'], $athleteData->athlete_id);
+            array_push($currentLevel, getDataForLevel($pdo, $levelMinus1['id'], $athleteData->athlete_id));
+            array_push($currentLevel, getDataForLevel($pdo, $athleteData->current_level, $athleteData->athlete_id));
+            array_push($currentLevel, getDataForLevel($pdo, $levelPlus1['id'], $athleteData->athlete_id));
         } else if($levelMinus2 != false && $levelMinus1 != false) {
-            $results[$i]['levels'][0] = getDataForLevel($pdo, $levelMinus2['id'], $athleteData->athlete_id);
-            $results[$i]['levels'][1] = getDataForLevel($pdo, $levelMinus1['id'], $athleteData->athlete_id);
-            $results[$i]['levels'][2] = getDataForLevel($pdo, $athleteData->current_level, $athleteData->athlete_id);
+            array_push($currentLevel, getDataForLevel($pdo, $levelMinus2['id'], $athleteData->athlete_id));
+            array_push($currentLevel, getDataForLevel($pdo, $levelMinus1['id'], $athleteData->athlete_id));
+            array_push($currentLevel, getDataForLevel($pdo, $athleteData->current_level, $athleteData->athlete_id));
 
         } else if($levelPlus1 != false && $levelPlus2 != false) {
-            $results[$i]['levels'][0] = getDataForLevel($pdo, $athleteData->current_level, $athleteData->athlete_id);
-            $results[$i]['levels'][1] = getDataForLevel($pdo, $levelPlus1['id'], $athleteData->athlete_id);
-            $results[$i]['levels'][2] = getDataForLevel($pdo, $levelPlus2['id'], $athleteData->athlete_id);
+            array_push($currentLevel, getDataForLevel($pdo, $athleteData->current_level, $athleteData->athlete_id));
+            array_push($currentLevel, getDataForLevel($pdo, $levelPlus1['id'], $athleteData->athlete_id));
+            array_push($currentLevel, getDataForLevel($pdo, $levelPlus2['id'], $athleteData->athlete_id));
         } else {
             http_response_code(HTTP_CODE_NOT_FOUND);
             return $error->createError('No triple level found with starting point of level id: ' . $athleteData->current_level);
+        }
+
+        array_push($results[$page]['events'], getEvents($pdo, $error, $currentLevel, $athleteData->athlete_id));
+        array_push($results[$page]['levels'], $currentLevel);
+
+        $newPage = !$newPage;
+        if($newPage) {
+            $page++;
         }
     }
 
@@ -63,14 +79,27 @@ function getLevelExistsAndData($pdo, $levelGroupId, $levelNumber) {
 }
 
 function getDataForLevel($pdo, $levelId, $athleteId) {
-    $stmt = $pdo->prepare("SELECT name, level_number, levels.id, report_cards.id AS report_cards_id FROM levels 
+    $stmt = $pdo->prepare("SELECT name, level_number, levels.id FROM levels 
         INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
-        LEFT JOIN report_cards ON levels.id = report_cards.levels_id
-        WHERE levels.id = :levels_id AND levels.active = 1 AND (athletes_id = :athlete_id OR athletes_id IS NULL)");
+        WHERE levels.id = :levels_id AND levels.active = 1");
+
+    $stmt->execute(['levels_id' => $levelId]);
+
+    $results = $stmt->fetchAll()[0];
+
+
+    $stmt = $pdo->prepare("SELECT id AS report_cards_id FROM report_cards
+        WHERE levels_id = :levels_id AND athletes_id = :athlete_id");
 
     $stmt->execute(['levels_id' => $levelId, "athlete_id" => $athleteId]);
 
-    $results = $stmt->fetchAll()[0];
+    $reportCardsResults = $stmt->fetchAll();
+    if(count($reportCardsResults) == 0) {
+        $results['report_cards_id'] = NULL;
+    } else {
+        $results['report_cards_id'] = $reportCardsResults[0]['report_cards_id'];
+    }
+
 
     $stmt = $pdo->prepare("SELECT name, skills.id, events_id, rank FROM skills 
         LEFT JOIN report_cards_components ON report_cards_components.skills_id = skills.id
