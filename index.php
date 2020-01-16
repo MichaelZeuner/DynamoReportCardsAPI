@@ -415,6 +415,16 @@ switch($selector) {
             }
         break;
 
+        case 'get-level-from-name-number':
+            $stmt = $pdo->prepare("SELECT levels.id, level_number, level_groups.id AS level_groups_id, name FROM levels  
+                INNER JOIN level_groups ON level_groups.id = levels.level_groups_id 
+                WHERE name = :name AND level_number = :level_number LIMIT 1");
+                
+            $stmt->execute(['name' => $url[1], 'level_number' => $url[2]]);
+
+            echo json_encode($stmt->fetch());
+        break;
+
         case 'get-testing-sheet-data':
             //url[1] should be a json string. where its an array [{athlete_id, current_level}]
             echo json_encode(getTestingSheetData($pdo, $error, json_decode($url[1])));
