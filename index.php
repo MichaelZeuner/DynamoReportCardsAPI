@@ -7,22 +7,8 @@ define('COACH', 'COACH');
 define('SUPERVISOR', 'SUPERVISOR');
 define('ADMIN', 'ADMIN');
 
-require_once(ROOT . '/helpers/http_codes.php');
-require_once(ROOT . '/helpers/errors.php');
-require_once(ROOT . '/helpers/get-report-cards.php');
-require_once(ROOT . '/helpers/get-report-cards-sent-back.php');
-require_once(ROOT . '/helpers/get-printable-report-card.php');
-require_once(ROOT . '/helpers/get-testing-sheet-data.php');
-require_once(ROOT . '/CRUD/CRUD.php');
-require_once(ROOT . '/CRUD/commentsCRUD.php');
-
-//header("Access-Control-Allow-Headers: Authorization");
-//header("Content-Type: application/json; charset=UTF-8");
-//header("Access-Control-Allow-Methods: POST");
-//header("Access-Control-Allow-Origin: *");
-
-if (isset($_SERVER['HTTP_ORIGIN'])) {
-    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+if (isset($_SERVER['HTTP_REFERER'])) {
+    header("Access-Control-Allow-Origin: *");
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Max-Age: 86400');    // cache for 1 day
 }
@@ -36,6 +22,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
         header("Access-Control-Allow-Headers:        {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
 }
+
+require_once(ROOT . '/helpers/http_codes.php');
+require_once(ROOT . '/helpers/errors.php');
+require_once(ROOT . '/helpers/get-report-cards.php');
+require_once(ROOT . '/helpers/get-report-cards-sent-back.php');
+require_once(ROOT . '/helpers/get-printable-report-card.php');
+require_once(ROOT . '/helpers/get-testing-sheet-data.php');
+require_once(ROOT . '/CRUD/CRUD.php');
+require_once(ROOT . '/CRUD/commentsCRUD.php');
+
+//header("Access-Control-Allow-Headers: Authorization");
+//header("Content-Type: application/json; charset=UTF-8");
+//header("Access-Control-Allow-Methods: POST");
+//header("Access-Control-Allow-Origin: *");
 
 
 $error = new ErrorProcess();
@@ -66,7 +66,7 @@ if (isset($_SERVER) && isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_A
         $error->echoError('Does this happen?');
         die();  
     }
-} else if(isLocal()) {
+} else {
     $error->echoError('Probably no access -- silly silly -- required only for local. Something causes multiple call with CORS on local');
     die();
 }
@@ -91,6 +91,7 @@ if(isset($collection2)) {
 //crud
 switch($selector) {
     case 'login':
+        
     if(empty($loggedInUser)) {
         http_response_code(HTTP_CODE_NOT_AUTHORIZED);
         $error->echoError('Incorrect email or password');
@@ -225,6 +226,59 @@ switch($selector) {
         case 'read-levels':
         $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1");
         $stmt->execute();
+
+        $results = $stmt->fetchAll();
+        if(count($results) == 0) {
+            http_response_code(HTTP_CODE_NOT_FOUND);
+            $error->echoError('No data found');
+        } else {
+            http_response_code(HTTP_CODE_OK);
+            echo json_encode($results);
+        }
+        break;
+
+        case 'read-levels-group-full':
+            $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1 AND level_groups_id = ?");
+            $stmt->execute([$item]);
+    
+            $levels = $stmt->fetchAll();
+            if(count($levels) == 0) {
+                http_response_code(HTTP_CODE_NOT_FOUND);
+                $error->echoError('No data found');
+            } else {
+                for($i=0; $i<count($levels); $i++) {
+                    $levels[$i]['events'] = [];
+                    $stmt = $pdo->prepare("SELECT DISTINCT events.id, events.name FROM events INNER JOIN skills ON skills.events_id = events.id WHERE levels_id = :id AND events.active = 1");
+                    $stmt->execute(['id' => $levels[$i]['id']]);
+
+                    $events = $stmt->fetchAll();
+                    if(count($events) > 0) {
+                        $levels[$i]['events'] = $events;
+
+                        for($x=0; $x<count($events); $x++) {
+                            $levels[$i]['events'][$x]['skills'] = [];
+                            $stmt = $pdo->prepare("SELECT DISTINCT id, name FROM skills WHERE levels_id = :levels_id AND events_id = :events_id AND active = 1");
+                            $stmt->execute(['levels_id' => $levels[$i]['id'], 'events_id' => $levels[$i]['events'][$x]['id']]);
+                        
+                            $skills = $stmt->fetchAll();
+                            if(count($skills) > 0) {
+                                $levels[$i]['events'][$x]['skills'] = $skills;
+                            }
+                        }
+                    }
+                }
+
+
+                http_response_code(HTTP_CODE_OK);
+                echo json_encode($levels);
+            }
+
+            
+        break;
+
+        case 'read-levels-group':
+        $stmt = $pdo->prepare("SELECT levels.id, level_groups.id AS level_groups_id, level_groups.name, level_number FROM levels INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE levels.active = 1 AND level_groups.active = 1 AND level_groups_id = ?");
+        $stmt->execute([$item]);
 
         $results = $stmt->fetchAll();
         if(count($results) == 0) {
@@ -438,3 +492,9 @@ switch($selector) {
 
     break;
 } 
+
+function logMsg($message) {
+    $fp = fopen('log.txt', 'a');
+    fwrite($fp, date('Y-m-d H:i:s') . "::$message\n");
+    fclose($fp);  
+}
