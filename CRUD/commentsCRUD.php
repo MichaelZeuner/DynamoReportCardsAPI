@@ -1,17 +1,31 @@
 <?php
-function getComments($pdo, $error, $accessLevel, $item) {
+function getComments($pdo, $error, $accessLevel, $levelGroupId) {
     $commentsCRUD = new Comments($pdo, $error);
     $commentsCRUD->setAccessLevel($accessLevel);
-    $comments = $commentsCRUD->read($item, null);
+    $comments = $commentsCRUD->read(null, null);
 
-    for($i=0; $i<count($comments); $i++) {
+    for($i=count($comments)-1; $i>=0; $i--) {
         $stmt = $pdo->prepare("SELECT levels_id AS id, level_groups_id, name, level_number FROM comment_levels 
             INNER JOIN levels ON comment_levels.levels_id = levels.id
             INNER JOIN level_groups ON level_groups.id = levels.level_groups_id
             WHERE comments_id = :comments_id");
         $stmt->execute(['comments_id' => $comments[$i]['id']]);
 
-        $comments[$i]['levels'] = $stmt->fetchAll();
+        $levels = $stmt->fetchAll();
+        $comments[$i]['levels'] = $levels;
+
+        if($levelGroupId !== null) {
+            $found = false;
+            for($x=0; $x<count($levels); $x++) {
+                if($levels[$x]['level_groups_id'] == $levelGroupId) {
+                    $found = true;
+                    break;
+                }
+            }
+            if($found == false && count($levels) != 0) {
+                array_splice($comments, $i, 1);
+            }
+        }
     }
     return $comments;
 }

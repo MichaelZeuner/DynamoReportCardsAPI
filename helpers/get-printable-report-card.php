@@ -41,10 +41,11 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
     $numberOfComments = 5;
     $stmt = $pdo->prepare("SELECT 
         name AS level_name, level_number, session, comment, status, updated_date,
-        fusers.first_name, fusers.last_name, susers.first_name as s_first_name, susers.last_name as s_last_name
+        fusers.first_name, fusers.last_name, susers.first_name as s_first_name, athletes.first_name as a_first_name, athletes.last_name as a_last_name, susers.last_name as s_last_name
         FROM report_cards 
         INNER JOIN levels ON report_cards.levels_id = levels.id 
         INNER JOIN level_groups ON levels.level_groups_id = level_groups.id 
+        INNER JOIN athletes ON report_cards.athletes_id = athletes.id 
         INNER JOIN users as fusers ON report_cards.submitted_by = fusers.id 
         LEFT JOIN users as susers ON report_cards.secondary_coach_id = susers.id 
         WHERE athletes_id = :athletes_id AND level_groups.id = :levelGroupId AND approved IS NOT null 
@@ -70,23 +71,23 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
             $skillObj = $stmtSkill->fetch();
 
             $skillComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $skillObj['comment']));
-            $skillCommentClean = strtolower(preg_replace('/\(.*\)/', "", $skillComment));
+            $skillCommentClean = ucfirst(strtolower(preg_replace('/\(.*\)/', "", $skillComment)));
 
             $stmtPersonality = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtPersonality->execute(['id' => $card_comments['personality_comment_id']]);
-            $personalityComment = $stmtPersonality->fetch()['comment'];
+            $personalityComment = ucfirst($stmtPersonality->fetch()['comment']);
 
             $stmtOutro = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtOutro->execute(['id' => $card_comments['closing_comment_id']]);
-            $outroComment = $stmtOutro->fetch()['comment'];
+            $outroComment = ucfirst($stmtOutro->fetch()['comment']);
 
-            $comments[$i]['comment'] = str_replace("~!NAME!~", $comments[$i]['first_name'], $introComment);
+            $comments[$i]['comment'] = str_replace("~!NAME!~", $comments[$i]['a_first_name'], $introComment);
             $comments[$i]['comment'] .= ' ';
-            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $skillCommentClean);
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $skillCommentClean);
             $comments[$i]['comment'] .= ' ';
-            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $personalityComment);
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $personalityComment);
             $comments[$i]['comment'] .= ' ';
-            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['first_name'], $outroComment);
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $outroComment);
         }
 
         if(count($comments) < $numberOfComments) {

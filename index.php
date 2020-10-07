@@ -156,6 +156,11 @@ switch($selector) {
     $reportCardsComments->process($item, $join, $accessLevel);
     break;
 
+    case 'comments':
+    $comments = new Comments($pdo, $error);
+    $comments->process($item, $join, $accessLevel);
+    break;
+
     default:
 
     //others
@@ -390,6 +395,10 @@ switch($selector) {
         break;
 
         case 'get-comments':
+        echo json_encode(getComments($pdo, $error, $accessLevel, null));
+        break;
+
+        case 'get-comments-group':
         echo json_encode(getComments($pdo, $error, $accessLevel, $item));
         break;
 
