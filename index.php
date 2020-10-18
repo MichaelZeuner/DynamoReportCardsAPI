@@ -340,7 +340,7 @@ switch($selector) {
         $stmt->execute(['id' => $url[1]]);
         $access = $stmt->fetch()['access'];
         if($access === 'COACH') {
-            getReportCards($pdo, $error, '(submitted_by = :id OR secondary_coach_id = :id) AND approved is NOT null AND status != "Partial"', ['id' => $url[1]]);
+            getReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"', [$url[1], $url[1]]);
         } else {
             getReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"');
         }
