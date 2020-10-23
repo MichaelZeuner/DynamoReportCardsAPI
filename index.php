@@ -493,6 +493,32 @@ switch($selector) {
             echo json_encode(getTestingSheetData($pdo, $error, json_decode($url[1])));
         break;
 
+        case 'post-athlete-csv':
+            if(empty($_POST)) {
+                $_POST = json_decode(file_get_contents('php://input'), true);
+            }
+
+            $counter = 0;
+            for($i=0; $i<count($_POST); $i++) {
+                $athlete = $_POST[$i];
+
+                $stmt = $pdo->prepare("SELECT * FROM athletes WHERE first_name LIKE :first_name AND last_name LIKE :last_name AND date_of_birth LIKE :date_of_birth");
+                $stmt->execute($athlete);
+
+                
+                $results = $stmt->fetchAll();
+                if(count($results) == 0) {
+                    $stmt1 = $pdo->prepare("INSERT INTO athletes (first_name, last_name, date_of_birth) VALUES (:first_name, :last_name, :date_of_birth)");
+                    $stmt1->execute($athlete);
+                    $results1 = $stmt1->fetchAll();
+                    $counter++;
+                }
+            }
+
+            echo '{"created": '.$counter.'}';
+            http_response_code(HTTP_CODE_OK);
+        break;
+
         default:
         http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
