@@ -70,7 +70,7 @@ function getLevelInfo($pdo, $levelId) {
 }
 
 function getLevelExistsAndData($pdo, $levelGroupId, $levelNumber) {
-    $stmt = $pdo->prepare("SELECT * FROM levels WHERE level_groups_id = :level_groups_id AND level_number = :level_number");
+    $stmt = $pdo->prepare("SELECT * FROM levels WHERE level_groups_id = :level_groups_id AND level_number = :level_number AND active = 1");
     $stmt->execute(['level_groups_id' => $levelGroupId, "level_number" => $levelNumber]);
     
     $results = $stmt->fetchAll();
