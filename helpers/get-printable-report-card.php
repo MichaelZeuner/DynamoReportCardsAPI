@@ -115,7 +115,7 @@ function getEvents($pdo, $error, $levels, $athleteId) {
     }
     $whereLevels .= ")";
 
-    $stmt = $pdo->query("SELECT DISTINCT events.id, events.name FROM skills INNER JOIN events ON skills.events_id = events.id WHERE skills.active = 1 AND $whereLevels");
+    $stmt = $pdo->query("SELECT DISTINCT events.id, events.name FROM skills INNER JOIN events ON skills.events_id = events.id WHERE skills.active = 1 AND events.active = 1 AND $whereLevels");
 
     $allEvents = $stmt->fetchAll();
 
@@ -136,7 +136,7 @@ function getEventsSkills($pdo, $error, $levels, $events, $athleteId) {
         $skillsInEventLevel = [];
         $maxSkills = 0;
         for($x=0; $x<count($levels); $x++) {
-            $stmt = $pdo->prepare("SELECT id, name FROM skills WHERE active = 1 AND levels_id = :level_id AND events_id = :event_id");
+            $stmt = $pdo->prepare("SELECT id, name FROM skills WHERE active = 1 AND levels_id = :level_id AND events_id = :event_id AND skills.active = 1");
             $stmt->execute(['level_id' => $levels[$x]['id'], 'event_id' => $events[$i]['id']]);
 
             $allSkills = $stmt->fetchAll();
@@ -199,7 +199,7 @@ function getRecentLevel($pdo, $error, $athleteId, $levelGroupId) {
         http_response_code(HTTP_CODE_NOT_FOUND);
         $error->echoError('No recent level found when attempting to generate printable report card... getRecentLevel() [1]');
     } else {
-        $stmt2 = $pdo->prepare("SELECT levels.id, name, level_number FROM `levels` INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE name LIKE :name ORDER BY level_number ASC");
+        $stmt2 = $pdo->prepare("SELECT levels.id, name, level_number FROM `levels` INNER JOIN level_groups ON levels.level_groups_id = level_groups.id WHERE name LIKE :name AND levels.active = 1 ORDER BY level_number ASC");
         $stmt2->execute(['name' => $levelName['name']]);
 
         $allLevels = $stmt2->fetchAll();
