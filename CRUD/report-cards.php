@@ -30,10 +30,16 @@ class ReportCards extends CRUD
     }
 
     protected function dataManipulationUpdate($data) { 
+        if (isset($data['level'])) {
+            $newData['levels_id'] = $data['level']['id'];
+            $newData['athletes_id'] = $data['athlete']['id'];
+        } else {
+            $newData['levels_id'] = $data['levels_id'];
+            $newData['athletes_id'] = $data['athletes_id'];
+        }
+        
         $newData['submitted_by'] = $data['submitted_by'];
-        $newData['athletes_id'] = $data['athlete']['id'];
         $newData['secondary_coach_id'] = $data['secondary_coach_id'];
-        $newData['levels_id'] = $data['level']['id'];
         $newData['comment'] = $data['comment'];
         $newData['approved'] = $data['approved'];
         $newData['status'] = $data['status'];
