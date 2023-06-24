@@ -1,15 +1,34 @@
 <?php
 
-function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC', $returnArrayOnEmpty = false) {
-    $stmt = $pdo->prepare(
-        "SELECT report_cards.id, submitted_by, secondary_coach_id, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, session,
-                day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
-        FROM report_cards 
-        INNER JOIN users suser ON suser.id = submitted_by 
-        LEFT JOIN users auser ON auser.id = approved 
-        LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
-        WHERE $where 
-        ORDER BY $orderBy");
+function countReportCards($pdo, $error, $where) {
+    $sql = "SELECT COUNT(id) as count FROM report_cards WHERE $where";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([]);
+    $results = $stmt->fetchAll();
+    if(count($results) == 0) {
+        http_response_code(HTTP_CODE_NOT_FOUND);
+        $error->echoError("No data found with WHERE $where");
+    } else if(count($results) == 1) {
+        http_response_code(HTTP_CODE_OK);
+        echo json_encode($results[0]);
+    } else {
+        http_response_code(HTTP_CODE_BAD_REQUEST);
+        $error->echoError("More than one response... WHERE $where");
+    }
+}
+
+function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC', $returnArrayOnEmpty = false, $limit = 10, $page = 1) {
+    $offset = ($page-1)*$limit;
+    $sql = "SELECT report_cards.id, submitted_by, secondary_coach_id, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, session,
+            day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
+            FROM report_cards 
+            INNER JOIN users suser ON suser.id = submitted_by 
+            LEFT JOIN users auser ON auser.id = approved 
+            LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
+            WHERE $where 
+            ORDER BY $orderBy
+            LIMIT $limit OFFSET $offset";
+    $stmt = $pdo->prepare($sql);
         
     $stmt->execute($arr);
     $results = $stmt->fetchAll();

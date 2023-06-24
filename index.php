@@ -335,14 +335,31 @@ switch($selector) {
         getReportCardsSentBack($pdo, $error, $url[1]);
         break;
 
+        case 'report-cards-count':
+        $type = $url[2];
+        if($type == 'completed') {
+            $stmt = $pdo->prepare("SELECT access FROM users WHERE id = :id");
+            $stmt->execute(['id' => $url[1]]);
+            $access = $stmt->fetch()['access'];
+            if($access === 'COACH') {
+                countReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"');
+            } else {
+                countReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"');
+            }
+        }
+
+        break;
+
         case 'report-cards-completed':
         $stmt = $pdo->prepare("SELECT access FROM users WHERE id = :id");
         $stmt->execute(['id' => $url[1]]);
         $access = $stmt->fetch()['access'];
+        $limit = $url[2];
+        $page = $url[3];
         if($access === 'COACH') {
-            getReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"', [$url[1], $url[1]]);
+            getReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"', [$url[1], $url[1]], $limit, $page);
         } else {
-            getReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"');
+            getReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"', [], 'updated_date DESC', false, $limit, $page);
         }
         break;
 
