@@ -39,6 +39,13 @@ require_once(ROOT . '/CRUD/commentsCRUD.php');
 
 
 $error = new ErrorProcess();
+$currentUrl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$parsedUrl = parse_url($currentUrl);
+$queryParams = [];
+if (isset($parsedUrl['query'])) {
+    parse_str($parsedUrl['query'], $queryParams);
+}
+
 $path_info = !empty($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : (!empty($_SERVER['ORIG_PATH_INFO']) ? $_SERVER['ORIG_PATH_INFO'] : '');
 
 $url = explode('/', ltrim($path_info, '/'));
@@ -341,10 +348,16 @@ switch($selector) {
             $stmt = $pdo->prepare("SELECT access FROM users WHERE id = :id");
             $stmt->execute(['id' => $url[1]]);
             $access = $stmt->fetch()['access'];
+            
+            $firstName = isset($queryParams['firstName']) ? $queryParams['firstName'] : '';
+            $lastName = isset($queryParams['lastName']) ? $queryParams['lastName'] : '';
+            $year = isset($queryParams['year']) ? $queryParams['year'] : null;
+            $season = isset($queryParams['season']) ? $queryParams['season'] : null;
+            
             if($access === 'COACH') {
-                countReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"');
+                countReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"', $firstName, $lastName, $year, $season);
             } else {
-                countReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"');
+                countReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"', $firstName, $lastName, $year, $season);
             }
         }
 
@@ -354,12 +367,19 @@ switch($selector) {
         $stmt = $pdo->prepare("SELECT access FROM users WHERE id = :id");
         $stmt->execute(['id' => $url[1]]);
         $access = $stmt->fetch()['access'];
-        $limit = $url[2];
-        $page = $url[3];
+
+        $limit = isset($queryParams['limit']) ? $queryParams['limit'] : 10;
+        $page = isset($queryParams['page']) ? $queryParams['page'] : 1;
+
+        $firstName = isset($queryParams['firstName']) ? $queryParams['firstName'] : '';
+        $lastName = isset($queryParams['lastName']) ? $queryParams['lastName'] : '';
+        $year = isset($queryParams['year']) ? $queryParams['year'] : null;
+        $season = isset($queryParams['season']) ? $queryParams['season'] : null;
+
         if($access === 'COACH') {
-            getReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"', [$url[1], $url[1]], $limit, $page);
+            getReportCards($pdo, $error, '(submitted_by = ? OR secondary_coach_id = ?) AND approved is NOT null AND status != "Partial"', [$url[1], $url[1]], $limit, $page, $firstName, $lastName, $year, $season);
         } else {
-            getReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"', [], 'updated_date DESC', false, $limit, $page);
+            getReportCards($pdo, $error, 'approved is NOT null AND status != "Partial"', [], 'updated_date DESC', false, $limit, $page, $firstName, $lastName, $year, $season);
         }
         break;
 

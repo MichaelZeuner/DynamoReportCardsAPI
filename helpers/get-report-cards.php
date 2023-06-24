@@ -1,7 +1,15 @@
 <?php
 
-function countReportCards($pdo, $error, $where) {
-    $sql = "SELECT COUNT(id) as count FROM report_cards WHERE $where";
+function countReportCards($pdo, $error, $where, $firstName = '', $lastName = '', $year = '', $season = '') {
+    $where .= " AND athletes.first_name LIKE '%$firstName%' AND athletes.last_name LIKE '%$lastName%'";
+    if(empty($year) == false) {
+        $where .= " AND YEAR(report_cards.create_date) = $year";
+    }
+    if(empty($season) == false) {
+        $where .= " AND report_cards.session = '$season'";
+    }
+    
+    $sql = "SELECT COUNT(report_cards.id) as count FROM report_cards INNER JOIN athletes ON athletes.id = athletes_id WHERE $where";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([]);
     $results = $stmt->fetchAll();
@@ -17,11 +25,20 @@ function countReportCards($pdo, $error, $where) {
     }
 }
 
-function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC', $returnArrayOnEmpty = false, $limit = 10, $page = 1) {
+function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC', $returnArrayOnEmpty = false, $limit = 10, $page = 1, $firstName = '', $lastName = '', $year = '', $season = '') {
+    $where .= " AND athletes.first_name LIKE '%$firstName%' AND athletes.last_name LIKE '%$lastName%'";
+    if(empty($year) == false) {
+        $where .= " AND YEAR(report_cards.create_date) = $year";
+    }
+    if(empty($season) == false) {
+        $where .= " AND report_cards.session = '$season'";
+    }
+
     $offset = ($page-1)*$limit;
     $sql = "SELECT report_cards.id, submitted_by, secondary_coach_id, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, session,
             day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
             FROM report_cards 
+            INNER JOIN athletes ON athletes.id = athletes_id
             INNER JOIN users suser ON suser.id = submitted_by 
             LEFT JOIN users auser ON auser.id = approved 
             LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
