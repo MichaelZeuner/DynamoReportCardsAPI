@@ -3,7 +3,7 @@
 function countReportCards($pdo, $error, $where, $firstName = '', $lastName = '', $year = '', $season = '') {
     $where .= " AND athletes.first_name LIKE '%$firstName%' AND athletes.last_name LIKE '%$lastName%'";
     if(empty($year) == false) {
-        $where .= " AND YEAR(report_cards.create_date) = $year";
+        $where .= " AND YEAR(report_cards.created_date) = $year";
     }
     if(empty($season) == false) {
         $where .= " AND report_cards.session = '$season'";
@@ -28,7 +28,7 @@ function countReportCards($pdo, $error, $where, $firstName = '', $lastName = '',
 function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_date DESC', $returnArrayOnEmpty = false, $limit = 10, $page = 1, $firstName = '', $lastName = '', $year = '', $season = '') {
     $where .= " AND athletes.first_name LIKE '%$firstName%' AND athletes.last_name LIKE '%$lastName%'";
     if(empty($year) == false) {
-        $where .= " AND YEAR(report_cards.create_date) = $year";
+        $where .= " AND YEAR(report_cards.created_date) = $year";
     }
     if(empty($season) == false) {
         $where .= " AND report_cards.session = '$season'";
