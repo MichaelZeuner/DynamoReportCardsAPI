@@ -41,7 +41,18 @@ class Users extends CRUD
 
     protected function getReadSQL() {
         $table = $this->getTableName();
-        return "SELECT * FROM $table WHERE active = 1";
+        $currentUrl = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $parsedUrl = parse_url($currentUrl);
+        $queryParams = [];
+        if (isset($parsedUrl['query'])) {
+            parse_str($parsedUrl['query'], $queryParams);
+        }
+        $onlyActive = isset($queryParams['onlyActive']) ? filter_var($queryParams['onlyActive'], FILTER_VALIDATE_BOOLEAN) : true;
+        $sql = "SELECT * FROM $table";
+        if($onlyActive == true) {
+            $sql .=  " WHERE active = 1";
+        } 
+        return $sql;
     }
 
     protected function getUpdateAccess() {
