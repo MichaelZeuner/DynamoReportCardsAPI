@@ -70,12 +70,19 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
             $stmtSkill->execute(['id' => $card_comments['skill_comment_id'], 'event_id' => $card_comments['event_id'], 'skill_id' => $card_comments['skill_id']]);
             $skillObj = $stmtSkill->fetch();
 
+            // Convert skill_name and event_name to lowercase
+            $skillObj['skill_name'] = strtolower($skillObj['skill_name']);
+            $skillObj['event_name'] = strtolower($skillObj['event_name']);
+
             $skillComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $skillObj['comment']));
-            $skillCommentClean = ucfirst(strtolower(preg_replace('/\(.*\)/', "", $skillComment)));
+            $skillCommentClean = ucfirst(preg_replace('/\(.*\)/', "", $skillComment));
 
             $stmtPersonality = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtPersonality->execute(['id' => $card_comments['personality_comment_id']]);
-            $personalityComment = ucfirst($stmtPersonality->fetch()['comment']);
+            $personalityObj = $stmtPersonality->fetch();
+
+            $personalityComment = str_replace("~!EVENT!~", $skillObj['event_name'], str_replace("~!SKILL!~", $skillObj['skill_name'], $personalityObj['comment']));
+            $personalityCommentClean = ucfirst(preg_replace('/\(.*\)/', "", $personalityComment));
 
             $stmtOutro = $pdo->prepare('SELECT comment FROM comments WHERE id = :id');
             $stmtOutro->execute(['id' => $card_comments['closing_comment_id']]);
@@ -85,7 +92,7 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
             $comments[$i]['comment'] .= ' ';
             $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $skillCommentClean);
             $comments[$i]['comment'] .= ' ';
-            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $personalityComment);
+            $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $personalityCommentClean);
             $comments[$i]['comment'] .= ' ';
             $comments[$i]['comment'] .= str_replace("~!NAME!~", $comments[$i]['a_first_name'], $outroComment);
         }
