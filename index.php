@@ -556,6 +556,25 @@ switch($selector) {
             http_response_code(HTTP_CODE_OK);
         break;
 
+        case 'reativate-users':
+            $userId = $url[1];
+            $arr = [];
+            $arr['id'] = $userId;
+
+            $stmt = $pdo->prepare('UPDATE users SET active=1 WHERE id = :id');
+            $stmt->execute($arr);
+            
+            if($stmt->rowCount() === 0) {
+                http_response_code(HTTP_CODE_NOT_FOUND);
+                return $this->error->createError('No rows affected');
+            }
+            else {
+                http_response_code(HTTP_CODE_NO_CONTENT);
+            }
+
+
+            break;
+
         default:
         http_response_code(HTTP_CODE_BAD_REQUEST);
         $error->echoError("Invalid Selector [$selector]");
