@@ -539,6 +539,10 @@ switch($selector) {
             for($i=0; $i<count($_POST); $i++) {
                 $athlete = $_POST[$i];
 
+                // Remove accents from first_name and last_name fields
+                $athlete['first_name'] = removeAccents($athlete['first_name']);
+                $athlete['last_name'] = removeAccents($athlete['last_name']);
+
                 $stmt = $pdo->prepare("SELECT * FROM athletes WHERE first_name LIKE :first_name AND last_name LIKE :last_name AND date_of_birth LIKE :date_of_birth");
                 $stmt->execute($athlete);
 
@@ -583,6 +587,15 @@ switch($selector) {
 
     break;
 } 
+
+function removeAccents($str) {
+    $str = htmlentities($str, ENT_NOQUOTES, "UTF-8");
+    $str = preg_replace('#&([A-Za-z])(?:acute|grave|circ|uml|ring|tilde|cedil|lig);#', '\1', $str);
+    $str = preg_replace('#&([A-Za-z]{2})(?:lig);#', '\1', $str); // for ligatures e.g. '&oelig;'
+    $str = preg_replace('#&[^;]+;#', '', $str); // deletes other characters
+    return $str;
+}
+
 
 function logMsg($message) {
     $fp = fopen('log.txt', 'a');
