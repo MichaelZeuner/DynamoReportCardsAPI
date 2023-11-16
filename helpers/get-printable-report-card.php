@@ -49,7 +49,7 @@ function getCoachComments($pdo, $error, $athleteId, $levelGroupId) {
         INNER JOIN users as fusers ON report_cards.submitted_by = fusers.id 
         LEFT JOIN users as susers ON report_cards.secondary_coach_id = susers.id 
         WHERE athletes_id = :athletes_id AND level_groups.id = :levelGroupId AND approved IS NOT null 
-        ORDER BY level_number DESC LIMIT $numberOfComments");
+        ORDER BY level_number DESC, updated_date DESC LIMIT $numberOfComments");
     $stmt->execute(['athletes_id' => $athleteId, 'levelGroupId' => $levelGroupId]);
 
     $comments = $stmt->fetchAll();
