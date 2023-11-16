@@ -331,11 +331,11 @@ switch($selector) {
         break;
 
         case 'athletes-attempts-at-level':
-        getReportCards($pdo, $error, 'athletes_id = :athletes_id AND levels_id = :levels_id', ['athletes_id' => $url[1], 'levels_id' => $url[2]], 'updated_date DESC', true);
+        getReportCards($pdo, $error, 'athletes_id = :athletes_id AND levels_id = :levels_id', ['athletes_id' => $url[1], 'levels_id' => $url[2]], 'updated_date DESC', true, -1);
         break;
 
         case 'report-cards-requiring-approval':
-        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null AND status != "Partial"', [], 'submitted_by');
+        getReportCards($pdo, $error, 'approved is null AND comment_modifications is null AND status != "Partial"', [], 'submitted_by', false, -1);
         break;
 
         case 'report-cards-sent-back':

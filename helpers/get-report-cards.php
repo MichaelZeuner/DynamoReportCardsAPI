@@ -35,6 +35,7 @@ function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_dat
     }
 
     $offset = ($page-1)*$limit;
+    $limit = ($limit > 0) ? "LIMIT $limit OFFSET $offset" : "";
     $sql = "SELECT report_cards.id, submitted_by, secondary_coach_id, suser.first_name AS submitted_first_name, suser.last_name AS submitted_last_name, athletes_id, levels_id, comment, session,
             day_of_week, approved, status, auser.first_name AS approved_first_name, auser.last_name AS approved_last_name, comment_modifications, updated_date, created_date 
             FROM report_cards 
@@ -44,7 +45,7 @@ function getReportCards($pdo, $error, $where, $arr = [], $orderBy = 'updated_dat
             LEFT JOIN report_cards_mod ON report_cards_mod.report_cards_id = report_cards.id 
             WHERE $where 
             ORDER BY $orderBy
-            LIMIT $limit OFFSET $offset";
+            $limit";
     $stmt = $pdo->prepare($sql);
         
     $stmt->execute($arr);
